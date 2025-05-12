@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_proj/widget/daily_calendar_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_proj/widget/empty_widget.dart';
-void main() {
+import 'package:intl/date_symbol_data_local.dart';
+
+
+void main() async {
   runApp(const ProviderScope(child: MyApp()));
+  await initializeDateFormatting('ko_KR', null); // 혹은 'en_US' 등 원하는 로케일
+
 }
 
 class MyApp extends StatelessWidget {
@@ -17,7 +21,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const EmptyWidget(title: 'Flutter Demo Home Page 1'),
+      home: const DailyCalendarWidget(),
     );
   }
 }
