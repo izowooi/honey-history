@@ -39,9 +39,9 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
   } else {
     // 다른 날짜에 대한 기본 데이터
     return HistoricalEvent(
-      title: '${date.month}월 ${date.day}일의 역사적 사건',
+      title: '${date.month}월 ${date.day}일 미드웨이 해전',
       year: '${1900 + date.day}년',
-      content: '이 날에 일어난 역사적 사건에 대한 설명입니다. 실제 앱에서는 날짜별로 다른 실제 역사적 사건을 보여줍니다.',
+      content: "미드웨이 해전은 1942년 6월에 일어난 큰 바다 싸움이에요. 🌊 미국과 일본의 배들이 태평양 한가운데 있는 미드웨이라는 섬 근처에서 싸웠어요. 처음에는 일본이 이길 것 같았지만, 미국이 일본의 계획을 미리 알아내서 결국 미국이 이겼어요! 🇺🇸 이 싸움 덕분에 제2차 세계대전에서 미국이 유리해졌답니다. 관련 영화로는 '미드웨이'가 있어요! 🎬",
       imageUrl: 'assets/images/default_history.jpg',
       relatedMovies: [
         Movie(
@@ -72,9 +72,12 @@ class DailyCalendarWidget extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Daily Calendar'),
       ),
-      body: isLandscape
-      ? _buildPortrait(context, ref, selectedDate, historicalEvent)
-      : _buildPortrait(context, ref, selectedDate, historicalEvent),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: isLandscape
+          ? _buildPortrait(context, ref, selectedDate, historicalEvent)
+          : _buildPortrait(context, ref, selectedDate, historicalEvent),
+      ),
     );
   }
 
