@@ -3,46 +3,45 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_proj/model/model.dart';
 import 'package:flutter_proj/widget/error_display.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart';
+
 final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
+final showMoviesProvider = StateProvider<bool>((ref) => false);
 
 final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>((ref, date) async {
-  // 실제 앱에서는 API 호출이나 데이터베이스에서 데이터를 가져옵니다
-  // 여기서는 예시 데이터를 비동기적으로 반환합니다
-  await Future.delayed(const Duration(milliseconds: 300)); // 네트워크 요청 시뮬레이션
+  // JSON 파일 로드
+  final String jsonString = await rootBundle.loadString('assets/data/historical_events.json');
+  final Map<String, dynamic> jsonData = json.decode(jsonString);
   
-  // 실제로는 날짜에 따라 다른 데이터를 반환해야 합니다
+  // 날짜 형식 변환 (MM-dd)
   final formattedDate = DateFormat('MM-dd').format(date);
   
-  if (formattedDate == '05-16') {
+  // 해당 날짜의 데이터가 있는지 확인
+  if (jsonData.containsKey(formattedDate)) {
+    final eventData = jsonData[formattedDate];
     return HistoricalEvent(
-      title: '문화대혁명 시작',
-      year: '1966년',
-      content: '1966년 5월 16일, 중국에서 마오쩌둥이 주도한 문화대혁명이 시작되었습니다. 이 정치 운동은 10년간 지속되었으며, 중국 사회와 경제에 큰 영향을 미쳤습니다.',
-      imageUrl: 'assets/images/cultural_revolution.jpg',
-      relatedMovies: [
-        Movie(
-          title: '활착',
-          year: '1994',
-          director: '장이머우',
-          posterUrl: 'assets/images/to_live_poster.jpg',
-          description: '한 가족이 문화대혁명을 비롯한 중국 현대사의 격동기를 겪어나가는 이야기',
-        ),
-        Movie(
-          title: '마지막 황제',
-          year: '1987',
-          director: '베르나르도 베르톨루치',
-          posterUrl: 'assets/images/last_emperor_poster.jpg',
-          description: '청나라 마지막 황제 푸이의 인생과 문화혁명 시기의 경험을 다룬 작품',
-        ),
-      ],
+      title: eventData['title'],
+      year: eventData['year'],
+      content: eventData['content'],
+      imageUrl: eventData['imageUrl'],
+      relatedMovies: (eventData['relatedMovies'] as List)
+          .map((movie) => Movie(
+                title: movie['title'],
+                year: movie['year'],
+                director: movie['director'],
+                posterUrl: movie['posterUrl'],
+                description: movie['description'],
+              ))
+          .toList(),
     );
   } else {
-    // 다른 날짜에 대한 기본 데이터
+    // 기본 데이터 반환
     return HistoricalEvent(
-      title: '${date.month}월 ${date.day}일 미드웨이 해전',
+      title: '${date.month}월 ${date.day}일의 역사적 사건',
       year: '${1900 + date.day}년',
-      content: "미드웨이 해전은 1942년 6월에 일어난 큰 바다 싸움이에요. 🌊 미국과 일본의 배들이 태평양 한가운데 있는 미드웨이라는 섬 근처에서 싸웠어요. 처음에는 일본이 이길 것 같았지만, 미국이 일본의 계획을 미리 알아내서 결국 미국이 이겼어요! 🇺🇸 이 싸움 덕분에 제2차 세계대전에서 미국이 유리해졌답니다. 관련 영화로는 '미드웨이'가 있어요! 🎬",
-      imageUrl: 'assets/images/default_history.jpg',
+      content: '이 날에 일어난 역사적 사건에 대한 설명입니다. 실제 앱에서는 날짜별로 다른 실제 역사적 사건을 보여줍니다.',
+      imageUrl: 'assets/illustration/default_history.png',
       relatedMovies: [
         Movie(
           title: '관련 영화 제목',
@@ -56,7 +55,6 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
   }
 });
 
-
 class DailyCalendarWidget extends ConsumerWidget {
   const DailyCalendarWidget({super.key});
 
@@ -64,187 +62,138 @@ class DailyCalendarWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedDate = ref.watch(selectedDateProvider);
     final historicalEvent = ref.watch(historicalEventProvider(selectedDate));
-
-    final mediaQuery = MediaQuery.of(context);
-    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final showMovies = ref.watch(showMoviesProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Calendar'),
+        title: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: historicalEvent.when(
+            data: (event) => Text(
+              event.title,
+              key: ValueKey(event.title),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.pink,
+              ),
+            ),
+            loading: () => const Text('로딩 중...'),
+            error: (_, __) => const Text('오류 발생'),
+          ),
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+              ),
+              child: const Text(
+                '설정',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            CheckboxListTile(
+              title: const Text('관련 영화 표시'),
+              value: showMovies,
+              onChanged: (bool? value) {
+                if (value != null) {
+                  ref.read(showMoviesProvider.notifier).state = value;
+                }
+              },
+            ),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: isLandscape
-          ? _buildPortrait(context, ref, selectedDate, historicalEvent)
-          : _buildPortrait(context, ref, selectedDate, historicalEvent),
+        child: historicalEvent.when(
+          data: (event) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDateHeader(context, ref, selectedDate, event),
+              const SizedBox(height: 16),
+              _buildHistoryContent(event, showMovies),
+            ],
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => ErrorDisplay(message: err.toString()),
+        ),
       ),
     );
   }
 
-  Widget _buildPortrait(
-    BuildContext context,
-    WidgetRef ref,
-    DateTime selectedDate,
-    AsyncValue<HistoricalEvent> historicalEvent,
-  ) {
+  Widget _buildDateHeader(BuildContext context, WidgetRef ref, DateTime selectedDate, HistoricalEvent event) {
+    return Container(
+      height: 100,
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Stack(
+        children: [
+          // 날짜 (우측 상단)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.indigo,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                DateFormat('MM월 dd일 EEEE', 'ko_KR').format(selectedDate),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+          // 제목과 년도 (가운데)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.red[300],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${event.year} ${event.title}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHistoryContent(HistoricalEvent event, bool showMovies) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildDateHeader(context, ref, selectedDate),
-        const SizedBox(height: 16),
-        _buildHistoryContent(historicalEvent),
-      ],
-    );
-  }
-
-  Widget _buildDateHeader(BuildContext context, WidgetRef ref, DateTime selectedDate) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                DateFormat('yyyy년 MM월 dd일').format(selectedDate),
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                DateFormat('EEEE', 'ko_KR').format(selectedDate),
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios),
-                onPressed: () {
-                  ref.read(selectedDateProvider.notifier).state = 
-                      selectedDate.subtract(const Duration(days: 1));
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward_ios),
-                onPressed: () {
-                  final tomorrow = selectedDate.add(const Duration(days: 1));
-                  if (!tomorrow.isAfter(DateTime.now())) {
-                    ref.read(selectedDateProvider.notifier).state = tomorrow;
-                  }
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHistoryContent(AsyncValue<HistoricalEvent> historicalEventAsync) {
-    return historicalEventAsync.when(
-      data: (event) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHistoryCard(event),
-          const SizedBox(height: 24),
-          _buildRelatedMoviesSection(event),
-        ],
-      ),
-      loading: () => const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(),
-        ),
-      ),
-      error: (err, stack) => ErrorDisplay(message: err.toString()),
-    );
-  }
-
-  Widget _buildHistoryCard(HistoricalEvent event, {bool isCompact = false}) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 역사적 사건 이미지
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Image.asset(
-                event.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[300],
-                    child: const Center(
-                      child: Icon(Icons.image_not_supported, size: 40),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          
-          // 역사적 사건 내용
-          Padding(
+        Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.indigo,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        event.year,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '오늘의 역사',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  event.title,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
                 Text(
                   event.content,
                   style: const TextStyle(
@@ -252,11 +201,34 @@ class DailyCalendarWidget extends ConsumerWidget {
                     height: 1.5,
                   ),
                 ),
+                const SizedBox(height: 16),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: Image.asset(
+                      event.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: const Center(
+                            child: Icon(Icons.image_not_supported, size: 40),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
+        ),
+        if (showMovies && event.relatedMovies.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          _buildRelatedMoviesSection(event),
         ],
-      ),
+      ],
     );
   }
 
@@ -356,5 +328,4 @@ class DailyCalendarWidget extends ConsumerWidget {
       ),
     );
   }
-  
 }
