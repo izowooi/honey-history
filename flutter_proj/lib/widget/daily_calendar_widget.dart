@@ -147,7 +147,6 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDateHeader(context, ref, selectedDate, event),
-              const SizedBox(height: 16),
               _buildHistoryContent(event, showMovies),
             ],
           ),
@@ -167,7 +166,7 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
           // 날짜 (우측 상단)
           Positioned(
             top: 0,
-            right: 0,
+            left: 0,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
