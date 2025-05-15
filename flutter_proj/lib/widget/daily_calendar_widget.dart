@@ -25,15 +25,13 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
       year: eventData['year'],
       content: eventData['content'],
       imageUrl: eventData['imageUrl'],
-      relatedMovies: (eventData['relatedMovies'] as List)
-          .map((movie) => Movie(
-                title: movie['title'],
-                year: movie['year'],
-                director: movie['director'],
-                posterUrl: movie['posterUrl'],
-                description: movie['description'],
-              ))
-          .toList(),
+      relatedMovie: Movie(
+        title: eventData['relatedMovie']['title'],
+        year: eventData['relatedMovie']['year'],
+        director: eventData['relatedMovie']['director'],
+        posterUrl: eventData['relatedMovie']['posterUrl'],
+        description: eventData['relatedMovie']['description'],
+      ),
     );
   } else {
     // 기본 데이터 반환
@@ -42,15 +40,13 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
       year: '${1900 + date.day}년',
       content: '이 날에 일어난 역사적 사건에 대한 설명입니다. 실제 앱에서는 날짜별로 다른 실제 역사적 사건을 보여줍니다.',
       imageUrl: 'assets/illustration/default_history.png',
-      relatedMovies: [
-        Movie(
-          title: '관련 영화 제목',
-          year: '${2000 + date.day}',
-          director: '감독 이름',
-          posterUrl: 'assets/images/default_movie_poster.jpg',
-          description: '이 영화는 해당 역사적 사건을 배경으로 한 작품입니다.',
-        ),
-      ],
+      relatedMovie: Movie(
+        title: '관련 영화 제목',
+        year: '${2000 + date.day}',
+        director: '감독 이름',
+        posterUrl: 'assets/illustration/default_movie_poster.jpg',
+        description: '이 영화는 해당 역사적 사건을 배경으로 한 작품입니다.',
+      ),
     );
   }
 });
@@ -224,15 +220,15 @@ class DailyCalendarWidget extends ConsumerWidget {
             ),
           ),
         ),
-        if (showMovies && event.relatedMovies.isNotEmpty) ...[
+        if (showMovies) ...[
           const SizedBox(height: 24),
-          _buildRelatedMoviesSection(event),
+          _buildRelatedMovieSection(event),
         ],
       ],
     );
   }
 
-  Widget _buildRelatedMoviesSection(HistoricalEvent event) {
+  Widget _buildRelatedMovieSection(HistoricalEvent event) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -244,9 +240,7 @@ class DailyCalendarWidget extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 12),
-        ...event.relatedMovies.map<Widget>((movie) {
-          return _buildMovieCard(movie);
-        }).toList(),
+        _buildMovieCard(event.relatedMovie),
       ],
     );
   }

@@ -3,14 +3,14 @@ class HistoricalEvent {
   final String year;
   final String content;
   final String imageUrl;
-  final List<Movie> relatedMovies;
+  final Movie relatedMovie;
 
   HistoricalEvent({
     required this.title,
     required this.year,
     required this.content,
     required this.imageUrl,
-    required this.relatedMovies,
+    required this.relatedMovie,
   });
 }
 
