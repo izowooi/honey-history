@@ -1,0 +1,18 @@
+{
+  "movie_001": {
+    "title": "활착",
+    "year": "1994",
+    "director": "장이머우",
+    "posterUrl": "https://i.namu.wiki/i/az-zHHEkQ-fScbHkPh4C3XJSNclpThdq8SgdA8VFe5U9vKA9qoWaJ6di9V83NOgL9BhEjgNhu-Qqcg1EN1lFYA.webp",
+    "description": "한 가족이 문화대혁명을 비롯한 중국 현대사의 격동기를 겪어나가는 이야기",
+    "videoId": "l9laReRAYFk"
+  },
+  "movie_002": {
+    "title": "미드웨이",
+    "year": "2019",
+    "director": "롤랜드 에머리히",
+    "posterUrl": "https://i.namu.wiki/i/az-zHHEkQ-fScbHkPh4C3XJSNclpThdq8SgdA8VFe5U9vKA9qoWaJ6di9V83NOgL9BhEjgNhu-Qqcg1EN1lFYA.webp",
+    "description": "1942년 태평양 전쟁의 전환점이 된 미드웨이 해전을 다룬 영화",
+    "videoId": "l9laReRAYFk"
+  }
+} 

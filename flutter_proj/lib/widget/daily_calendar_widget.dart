@@ -11,28 +11,34 @@ final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
 final showMoviesProvider = StateProvider<bool>((ref) => false);
 
 final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>((ref, date) async {
-  // JSON 파일 로드
-  final String jsonString = await rootBundle.loadString('assets/data/historical_events.json');
-  final Map<String, dynamic> jsonData = json.decode(jsonString);
+  // 두 개의 JSON 파일 로드
+  final String historicalEventsString = await rootBundle.loadString('assets/data/historical_events.json');
+  final String moviesString = await rootBundle.loadString('assets/data/movies.json');
+  
+  final Map<String, dynamic> historicalEventsData = json.decode(historicalEventsString);
+  final Map<String, dynamic> moviesData = json.decode(moviesString);
   
   // 날짜 형식 변환 (MM-dd)
   final formattedDate = DateFormat('MM-dd').format(date);
   
   // 해당 날짜의 데이터가 있는지 확인
-  if (jsonData.containsKey(formattedDate)) {
-    final eventData = jsonData[formattedDate];
+  if (historicalEventsData.containsKey(formattedDate)) {
+    final eventData = historicalEventsData[formattedDate];
+    final movieId = eventData['relatedMovieId'];
+    final movieData = moviesData[movieId];
+    
     return HistoricalEvent(
       title: eventData['title'],
       year: eventData['year'],
       content: eventData['content'],
       imageUrl: 'assets/illustration/${eventData['imageUrl']}',
       relatedMovie: Movie(
-        title: eventData['relatedMovie']['title'],
-        year: eventData['relatedMovie']['year'],
-        director: eventData['relatedMovie']['director'],
-        posterUrl: eventData['relatedMovie']['posterUrl'],
-        description: eventData['relatedMovie']['description'],
-        videoId: eventData['relatedMovie']['videoId'] ?? 'iLnmTe5Q2Qw', // 기본값 설정
+        title: movieData['title'],
+        year: movieData['year'],
+        director: movieData['director'],
+        posterUrl: movieData['posterUrl'],
+        description: movieData['description'],
+        videoId: movieData['videoId'],
       ),
     );
   } else {
@@ -48,7 +54,7 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
         director: '감독 이름',
         posterUrl: 'assets/illustration/default_movie_poster.jpg',
         description: '이 영화는 해당 역사적 사건을 배경으로 한 작품입니다.',
-        videoId: 'iLnmTe5Q2Qw', // 기본값 설정
+        videoId: 'iLnmTe5Q2Qw',
       ),
     );
   }
