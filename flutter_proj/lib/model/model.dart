@@ -20,6 +20,7 @@ class Movie {
   final String director;
   final String posterUrl;
   final String description;
+  final String videoId;
 
   Movie({
     required this.title,
@@ -27,5 +28,6 @@ class Movie {
     required this.director,
     required this.posterUrl,
     required this.description,
+    required this.videoId,
   });
 }

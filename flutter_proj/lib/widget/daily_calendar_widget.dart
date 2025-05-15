@@ -5,6 +5,7 @@ import 'package:flutter_proj/model/model.dart';
 import 'package:flutter_proj/widget/error_display.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
 final showMoviesProvider = StateProvider<bool>((ref) => false);
@@ -31,6 +32,7 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
         director: eventData['relatedMovie']['director'],
         posterUrl: eventData['relatedMovie']['posterUrl'],
         description: eventData['relatedMovie']['description'],
+        videoId: eventData['relatedMovie']['videoId'] ?? 'iLnmTe5Q2Qw', // 기본값 설정
       ),
     );
   } else {
@@ -46,16 +48,41 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
         director: '감독 이름',
         posterUrl: 'assets/illustration/default_movie_poster.jpg',
         description: '이 영화는 해당 역사적 사건을 배경으로 한 작품입니다.',
+        videoId: 'iLnmTe5Q2Qw', // 기본값 설정
       ),
     );
   }
 });
 
-class DailyCalendarWidget extends ConsumerWidget {
+class DailyCalendarWidget extends ConsumerStatefulWidget {
   const DailyCalendarWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DailyCalendarWidget> createState() => _DailyCalendarWidgetState();
+}
+
+class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
+  YoutubePlayerController? _controller;
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  void _initYoutubePlayer(String videoId) {
+    _controller?.dispose();
+    _controller = YoutubePlayerController(
+      initialVideoId: videoId,
+      flags: const YoutubePlayerFlags(
+        autoPlay: false,
+        mute: true,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final selectedDate = ref.watch(selectedDateProvider);
     final historicalEvent = ref.watch(historicalEventProvider(selectedDate));
     final showMovies = ref.watch(showMoviesProvider);
@@ -246,79 +273,72 @@ class DailyCalendarWidget extends ConsumerWidget {
   }
 
   Widget _buildMovieCard(Movie movie) {
+    // 영화 제목으로부터 YouTube 비디오 ID를 가져오는 로직
+    // 실제 구현에서는 movie 객체에 videoId 필드를 추가하는 것이 좋습니다
+    final videoId = movie.videoId;
+    _initYoutubePlayer(videoId);
+
     return Card(
       elevation: 3,
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () {
-          // 영화 상세 정보 페이지로 이동
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 영화 포스터
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                bottomLeft: Radius.circular(12),
-              ),
-              child: SizedBox(
-                width: 100,
-                height: 150,
-                child: Image.asset(
-                  movie.posterUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: const Center(
-                        child: Icon(Icons.movie, size: 40),
-                      ),
-                    );
-                  },
-                ),
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
             ),
-            // 영화 정보
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      movie.title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+            child: _controller != null
+                ? YoutubePlayer(
+                    controller: _controller!,
+                    showVideoProgressIndicator: true,
+                    progressIndicatorColor: Colors.amber,
+                    progressColors: const ProgressBarColors(
+                      playedColor: Colors.amber,
+                      handleColor: Colors.amberAccent,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${movie.year} • ${movie.director}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      movie.description,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        height: 1.4,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                  )
+                : const SizedBox(
+                    height: 200,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  movie.title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 4),
+                Text(
+                  '${movie.year} • ${movie.director}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  movie.description,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
