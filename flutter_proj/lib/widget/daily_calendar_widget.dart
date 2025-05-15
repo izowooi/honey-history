@@ -24,7 +24,7 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
       title: eventData['title'],
       year: eventData['year'],
       content: eventData['content'],
-      imageUrl: eventData['imageUrl'],
+      imageUrl: 'assets/illustration/${eventData['imageUrl']}',
       relatedMovie: Movie(
         title: eventData['relatedMovie']['title'],
         year: eventData['relatedMovie']['year'],
