@@ -160,7 +160,9 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
   Widget _buildDateHeader(BuildContext context, WidgetRef ref, DateTime selectedDate, HistoricalEvent event) {
     return Container(
       height: 100,
-      margin: const EdgeInsets.only(bottom: 16),
+      height: 40,
+      margin: const EdgeInsets.only(bottom: 0),
+      color: Colors.blue.withOpacity(0.0),  // 디버깅용 색상
       child: Stack(
         children: [
           // 날짜 (우측 상단)
@@ -183,28 +185,6 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
               ),
             ),
           ),
-          // 제목과 년도 (가운데)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.red[300],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '${event.year} ${event.title}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -222,11 +202,22 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  event.content,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    height: 1.5,
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.red[300],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${event.year} ${event.title}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -246,6 +237,14 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
                         );
                       },
                     ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  event.content,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    height: 1.5,
                   ),
                 ),
               ],
