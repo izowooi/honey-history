@@ -9,6 +9,8 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
 final showMoviesProvider = StateProvider<bool>((ref) => false);
+final audioDurationProvider = StateProvider<String>((ref) => "3:48");
+final isPlayingProvider = StateProvider<bool>((ref) => false);
 
 final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>((ref, date) async {
   // 두 개의 JSON 파일 로드
@@ -87,6 +89,55 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
     );
   }
 
+  void _toggleAudio() {
+    // 더미 로직: 재생 상태 토글
+    ref.read(isPlayingProvider.notifier).state = !ref.read(isPlayingProvider);
+  }
+
+  Widget _buildAudioControl() {
+    final duration = ref.watch(audioDurationProvider);
+    final isPlaying = ref.watch(isPlayingProvider);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      // decoration: BoxDecoration(
+      //   color: Colors.white,
+      //   borderRadius: BorderRadius.circular(8),
+      //   boxShadow: [
+      //     BoxShadow(
+      //       color: Colors.black.withOpacity(0.0),
+      //       blurRadius: 4,
+      //       offset: const Offset(0, 2),
+      //     ),
+      //   ],
+      // ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            duration,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: Icon(
+              isPlaying ? Icons.pause_circle_outline : Icons.play_circle_outline,
+              color: Colors.black87,
+              size: 24,
+            ),
+            onPressed: _toggleAudio,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final selectedDate = ref.watch(selectedDateProvider);
@@ -159,14 +210,14 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
 
   Widget _buildDateHeader(BuildContext context, WidgetRef ref, DateTime selectedDate, HistoricalEvent event) {
     return Container(
-      height: 40,
+      height: 60,
       margin: const EdgeInsets.only(bottom: 0),
-      color: Colors.blue.withOpacity(0.0),  // 디버깅용 색상
+      color: Colors.blue.withOpacity(0.0),
       child: Stack(
         children: [
-          // 날짜 (우측 상단)
+          // 날짜 (좌측)
           Positioned(
-            top: 0,
+            top: 10,
             left: 0,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -183,6 +234,12 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
                 ),
               ),
             ),
+          ),
+          // 오디오 컨트롤 (우측)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: _buildAudioControl(),
           ),
         ],
       ),
