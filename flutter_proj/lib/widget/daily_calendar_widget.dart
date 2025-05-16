@@ -159,7 +159,6 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
 
   Widget _buildDateHeader(BuildContext context, WidgetRef ref, DateTime selectedDate, HistoricalEvent event) {
     return Container(
-      height: 100,
       height: 40,
       margin: const EdgeInsets.only(bottom: 0),
       color: Colors.blue.withOpacity(0.0),  // 디버깅용 색상
