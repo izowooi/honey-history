@@ -11,6 +11,7 @@ final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
 final showMoviesProvider = StateProvider<bool>((ref) => false);
 final audioDurationProvider = StateProvider<String>((ref) => "3:48");
 final isPlayingProvider = StateProvider<bool>((ref) => false);
+final fontSizeScaleProvider = StateProvider<double>((ref) => 1.0);  // 기본값 1.0
 
 final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>((ref, date) async {
   // 두 개의 JSON 파일 로드
@@ -188,6 +189,47 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
                 }
               },
             ),
+            const Divider(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Text(
+                '글자 크기',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            RadioListTile<double>(
+              title: const Text('보통'),
+              value: 1.0,
+              groupValue: ref.watch(fontSizeScaleProvider),
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(fontSizeScaleProvider.notifier).state = value;
+                }
+              },
+            ),
+            RadioListTile<double>(
+              title: const Text('크게'),
+              value: 1.5,
+              groupValue: ref.watch(fontSizeScaleProvider),
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(fontSizeScaleProvider.notifier).state = value;
+                }
+              },
+            ),
+            RadioListTile<double>(
+              title: const Text('더 크게'),
+              value: 2.0,
+              groupValue: ref.watch(fontSizeScaleProvider),
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(fontSizeScaleProvider.notifier).state = value;
+                }
+              },
+            ),
           ],
         ),
       ),
@@ -209,6 +251,8 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
   }
 
   Widget _buildDateHeader(BuildContext context, WidgetRef ref, DateTime selectedDate, HistoricalEvent event) {
+    final fontSizeScale = ref.watch(fontSizeScaleProvider);
+    
     return Container(
       height: 60,
       margin: const EdgeInsets.only(bottom: 0),
@@ -227,10 +271,10 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
               ),
               child: Text(
                 DateFormat('MM월 dd일 EEEE', 'ko_KR').format(selectedDate),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
-                  fontSize: 16,
+                  fontSize: 16 * fontSizeScale,
                 ),
               ),
             ),
@@ -247,6 +291,8 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
   }
 
   Widget _buildHistoryContent(HistoricalEvent event, bool showMovies) {
+    final fontSizeScale = ref.watch(fontSizeScaleProvider);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -268,10 +314,10 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
                     child: Text(
                       '${event.year} ${event.title}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 24,
+                        fontSize: 24 * fontSizeScale,
                       ),
                     ),
                   ),
@@ -298,8 +344,8 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
                 const SizedBox(height: 16),
                 Text(
                   event.content,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: 16 * fontSizeScale,
                     height: 1.5,
                   ),
                 ),
