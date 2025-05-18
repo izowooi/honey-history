@@ -212,7 +212,7 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
             ),
             RadioListTile<double>(
               title: const Text('크게'),
-              value: 1.5,
+              value: 1.2,
               groupValue: ref.watch(fontSizeScaleProvider),
               onChanged: (value) {
                 if (value != null) {
@@ -222,7 +222,7 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
             ),
             RadioListTile<double>(
               title: const Text('더 크게'),
-              value: 2.0,
+              value: 1.5,
               groupValue: ref.watch(fontSizeScaleProvider),
               onChanged: (value) {
                 if (value != null) {
