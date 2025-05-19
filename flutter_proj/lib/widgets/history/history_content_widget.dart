@@ -17,6 +17,7 @@ class HistoryContentWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fontSizeScale = ref.watch(fontSizeScaleProvider);
+    final useDetailedContent = ref.watch(useDetailedContentProvider);
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +69,7 @@ class HistoryContentWidget extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  event.content,
+                  useDetailedContent ? event.contentDetailed : event.contentSimple,
                   style: TextStyle(
                     fontSize: 16 * fontSizeScale,
                     height: 1.5,

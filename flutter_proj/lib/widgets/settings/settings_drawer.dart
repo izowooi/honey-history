@@ -9,6 +9,7 @@ class SettingsDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final showMovies = ref.watch(showMoviesProvider);
     final fontSizeScale = ref.watch(fontSizeScaleProvider);
+    final useDetailedContent = ref.watch(useDetailedContentProvider);
 
     return Drawer(
       child: ListView(
@@ -73,6 +74,39 @@ class SettingsDrawer extends ConsumerWidget {
             onChanged: (value) {
               if (value != null) {
                 ref.read(fontSizeScaleProvider.notifier).state = value;
+              }
+            },
+          ),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Text(
+              '내용 길이',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          RadioListTile<bool>(
+            title: const Text('초등학생용 (간단)'),
+            subtitle: const Text('쉽고 간단한 설명'),
+            value: false,
+            groupValue: useDetailedContent,
+            onChanged: (value) {
+              if (value != null) {
+                ref.read(useDetailedContentProvider.notifier).state = value;
+              }
+            },
+          ),
+          RadioListTile<bool>(
+            title: const Text('고등학생용 (상세)'),
+            subtitle: const Text('자세하고 전문적인 설명'),
+            value: true,
+            groupValue: useDetailedContent,
+            onChanged: (value) {
+              if (value != null) {
+                ref.read(useDetailedContentProvider.notifier).state = value;
               }
             },
           ),

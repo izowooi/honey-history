@@ -26,7 +26,8 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
     return HistoricalEvent(
       title: eventData['title'],
       year: eventData['year'],
-      content: eventData['content'],
+      contentSimple: eventData['content_simple'],
+      contentDetailed: eventData['content_detailed'],
       imageUrl: 'assets/illustration/${eventData['imageUrl']}',
       relatedMovie: Movie(
         title: movieData['title'],
@@ -42,7 +43,8 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
     return HistoricalEvent(
       title: '${date.month}월 ${date.day}일의 역사적 사건',
       year: '${1900 + date.day}년',
-      content: '이 날에 일어난 역사적 사건에 대한 설명입니다. 실제 앱에서는 날짜별로 다른 실제 역사적 사건을 보여줍니다.',
+      contentSimple: '[simple]이 날에 일어난 역사적 사건에 대한 설명입니다. 실제 앱에서는 날짜별로 다른 실제 역사적 사건을 보여줍니다.',
+      contentDetailed: '[detailed]이 날에 일어난 역사적 사건에 대한 설명입니다. 실제 앱에서는 날짜별로 다른 실제 역사적 사건을 보여줍니다.',
       imageUrl: 'assets/illustration/default_history.png',
       relatedMovie: Movie(
         title: '관련 영화 제목',
