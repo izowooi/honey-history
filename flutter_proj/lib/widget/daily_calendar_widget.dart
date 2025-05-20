@@ -54,6 +54,7 @@ class DailyCalendarWidget extends ConsumerWidget {
     final historicalEvent = ref.watch(historicalEventProvider(selectedDate));
     final showMovies = ref.watch(showMoviesProvider);
     final fontSizeScale = ref.watch(fontSizeScaleProvider);
+    final showSwipeHint = ref.watch(showSwipeHintProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -75,22 +76,79 @@ class DailyCalendarWidget extends ConsumerWidget {
         ),
       ),
       drawer: const SettingsDrawer(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: historicalEvent.when(
-          data: (event) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDateHeader(context, selectedDate, fontSizeScale, ref),
-              const SizedBox(height: 24),
-              HistoryContentWidget(
-                event: event,
-                showMovies: showMovies,
+      body: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity! > 0) {
+            // 오른쪽으로 스와이프 - 이전 날짜
+            ref.read(selectedDateProvider.notifier).state = 
+                selectedDate.subtract(const Duration(days: 1));
+            // 스와이프 후 힌트 숨기기
+            hideSwipeHint();
+          } else if (details.primaryVelocity! < 0) {
+            // 왼쪽으로 스와이프 - 다음 날짜
+            ref.read(selectedDateProvider.notifier).state = 
+                selectedDate.add(const Duration(days: 1));
+            // 스와이프 후 힌트 숨기기
+            hideSwipeHint();
+          }
+        },
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: historicalEvent.when(
+                data: (event) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildDateHeader(context, selectedDate, fontSizeScale, ref),
+                    const SizedBox(height: 24),
+                    HistoryContentWidget(
+                      event: event,
+                      showMovies: showMovies,
+                    ),
+                  ],
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => ErrorDisplay(message: err.toString()),
               ),
-            ],
-          ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => ErrorDisplay(message: err.toString()),
+            ),
+            // 스와이프 힌트 오버레이
+            if (showSwipeHint.when(
+              data: (show) => show,
+              loading: () => false,
+              error: (_, __) => false,
+            ))
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 20,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          '스와이프하여 날짜 변경',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14 * fontSizeScale,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
