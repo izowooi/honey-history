@@ -50,7 +50,14 @@ class DailyCalendarWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedDate = ref.watch(selectedDateProvider);
+    final isDebug = ref.watch(isDebugProvider);
+    var selectedDate = ref.watch(selectedDateProvider);
+    if (isDebug) {
+      final now = DateTime.now();
+      final day = (now.day % 10) == 0 ? 1 : (now.day % 10);
+      selectedDate = DateTime(now.year, 6, day);
+    }
+
     final historicalEvent = ref.watch(historicalEventProvider(selectedDate));
     final showMovies = ref.watch(showMoviesProvider);
     final fontSizeScale = ref.watch(fontSizeScaleProvider);
