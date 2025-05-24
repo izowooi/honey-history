@@ -10,6 +10,7 @@ class SettingsDrawer extends ConsumerWidget {
     final showMovies = ref.watch(showMoviesProvider);
     final fontSizeScale = ref.watch(fontSizeScaleProvider);
     final useDetailedContent = ref.watch(useDetailedContentProvider);
+    final isDebug = ref.watch(isDebugProvider);
 
     return Drawer(
       child: ListView(
@@ -107,6 +108,27 @@ class SettingsDrawer extends ConsumerWidget {
             onChanged: (value) {
               if (value != null) {
                 ref.read(useDetailedContentProvider.notifier).state = value;
+              }
+            },
+          ),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Text(
+              '개발자 옵션',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          CheckboxListTile(
+            title: const Text('디버그 모드'),
+            subtitle: const Text('개발자용 디버그 정보 표시'),
+            value: isDebug,
+            onChanged: (bool? value) {
+              if (value != null) {
+                ref.read(isDebugProvider.notifier).state = value;
               }
             },
           ),
