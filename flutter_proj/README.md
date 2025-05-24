@@ -1,16 +1,16 @@
 # flutter_proj
 
-A new Flutter project.
 
-## Getting Started
+# 프롬프트
+## 
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+## 사건 생성
+플러터로 Daily Calendar 를 만들고 있어. 매일 매일 오늘과 관계된 역사적 인물이나 역사적 사건을 설명해주는 앱이야. 예시로 오늘의 사건 혹은 인물을 "콘스탄티노플 공방전", 오늘의 날짜를 6월4일 이라고 가정하고, 설명을 적어줘. 설명은 2가지 버전이 있어. 하나는 초등학생 수준, 하나는 고등학생 수준이야. 초등학생 수준은 글자수 200 글자 내외이고, 고등학생은 1500글자 내외로 부탁해. 둘 다 이모지를 사용하고, 흥미를 끌 수 있게 작성해줘. 오늘이 사건 혹은 인물과 무슨 관련이 있는 지도 포함해야해. 년도수와, 날짜도 있어야해.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+오늘 날짜 : 6월9일
+사건 혹은 인물명 : 표트르 대제
+위의 정보로 오늘의 사건 혹은 인물에 대해서 설명해줘.
+두 가지 버전을 설명해줘. 하나는 초등학생용 200 글자 내외, 나머지 하나는 고등학생 1500 글자 내외로 설명해줘.
+이모지를 충분히 사용하고, 흥미를 끌 수 있게 작성해줘.
