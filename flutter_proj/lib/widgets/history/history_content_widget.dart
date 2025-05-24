@@ -38,7 +38,7 @@ class HistoryContentWidget extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '${event.year} ${event.title}',
+                      '${event.year}년 ${event.title}',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
