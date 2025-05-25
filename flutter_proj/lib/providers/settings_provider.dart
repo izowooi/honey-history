@@ -5,6 +5,7 @@ final fontSizeScaleProvider = StateProvider<double>((ref) => 1.0);
 final showMoviesProvider = StateProvider<bool>((ref) => false);
 final useDetailedContentProvider = StateProvider<bool>((ref) => false);
 final isDebugProvider = StateProvider<bool>((ref) => false);
+final notificationEnabledProvider = StateProvider<bool>((ref) => false);
 
 final showSwipeHintProvider = FutureProvider<bool>((ref) async {
   final prefs = await SharedPreferences.getInstance();

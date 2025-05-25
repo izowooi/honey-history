@@ -11,6 +11,7 @@ class SettingsDrawer extends ConsumerWidget {
     final fontSizeScale = ref.watch(fontSizeScaleProvider);
     final useDetailedContent = ref.watch(useDetailedContentProvider);
     final isDebug = ref.watch(isDebugProvider);
+    final notificationEnabled = ref.watch(notificationEnabledProvider);
 
     return Drawer(
       child: ListView(
@@ -28,6 +29,17 @@ class SettingsDrawer extends ConsumerWidget {
               ),
             ),
           ),
+          CheckboxListTile(
+            title: const Text('알림'),
+            subtitle: const Text('매일 역사적 사건 알림 받기'),
+            value: notificationEnabled,
+            onChanged: (bool? value) {
+              if (value != null) {
+                ref.read(notificationEnabledProvider.notifier).state = value;
+              }
+            },
+          ),
+          const Divider(),
           CheckboxListTile(
             title: const Text('관련 영화 표시'),
             value: showMovies,
