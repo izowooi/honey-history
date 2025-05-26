@@ -8,16 +8,44 @@ import 'package:flutter_proj/providers/audio_provider.dart';
 import 'package:flutter_proj/widgets/history/history_content_widget.dart';
 import 'package:flutter_proj/widgets/settings/settings_drawer.dart';
 
-class DailyCalendarWidget extends ConsumerWidget {
+class DailyCalendarWidget extends ConsumerStatefulWidget {
   const DailyCalendarWidget({super.key});
 
+  @override
+  ConsumerState<DailyCalendarWidget> createState() => _DailyCalendarWidgetState();
+}
+
+class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
+  @override
+  void initState() {
+    super.initState();
+    final selectedDate = ref.read(selectedDateProvider);
+    loadAudio(ref, selectedDate);
+    print('Initial selectedDate: $selectedDate');
+  }
+
   void _toggleAudio(WidgetRef ref) {
-    ref.read(isPlayingProvider.notifier).state = !ref.read(isPlayingProvider);
+    toggleAudio(ref);  // audio_provider.dart의 toggleAudio 함수 호출
   }
 
   Widget _buildAudioControl(WidgetRef ref) {
     final duration = ref.watch(audioDurationProvider);
     final isPlaying = ref.watch(isPlayingProvider);
+    final hasAudioFile = ref.watch(hasAudioFileProvider);
+
+    if (!hasAudioFile) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: const Text(
+          '오디오 없음',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -49,7 +77,7 @@ class DailyCalendarWidget extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isDebug = ref.watch(isDebugProvider);
     var selectedDate = ref.watch(selectedDateProvider);
     if (isDebug) {
@@ -57,6 +85,13 @@ class DailyCalendarWidget extends ConsumerWidget {
       final day = (now.day % 10) == 0 ? 1 : (now.day % 10);
       selectedDate = DateTime(now.year, 6, day);
     }
+
+    // 날짜가 변경될 때만 오디오 로드
+    ref.listen(selectedDateProvider, (previous, next) {
+      if (previous != next) {
+        loadAudio(ref, next);
+      }
+    });
 
     final historicalEvent = ref.watch(historicalEventProvider(selectedDate));
     final showMovies = ref.watch(showMoviesProvider);
