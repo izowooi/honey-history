@@ -119,3 +119,11 @@ app.*.symbols
 !/dev/ci/**/Gemfile.lock
 python_proj/mp3_files/
 python_proj/wav_files/
+python_proj/.idea/misc.xml
+python_proj/.idea/modules.xml
+python_proj/.idea/python_proj.iml
+python_proj/.idea/vcs.xml
+python_proj/.idea/vcs.xml
+python_proj/.idea/inspectionProfiles/profiles_settings.xml
+python_proj/.idea/inspectionProfiles/Project_Default.xml
+python_proj/.idea/vcs.xml
