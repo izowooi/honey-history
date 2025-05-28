@@ -52,7 +52,7 @@ class HistoryContentWidget extends ConsumerWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: AspectRatio(
-                    aspectRatio: 16 / 9,
+                    aspectRatio: 16 / 16,
                     child: Image.asset(
                       event.imageUrl,
                       fit: BoxFit.cover,

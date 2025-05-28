@@ -143,7 +143,7 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildDateHeader(context, selectedDate, fontSizeScale, ref),
-                    const SizedBox(height: 24),
+                    //const SizedBox(height: 24),
                     HistoryContentWidget(
                       event: event,
                       showMovies: showMovies,
