@@ -1,0 +1,18 @@
+[
+    {
+        "id": "0608",
+        "name": "바이킹 습격",
+        "image": "0608.png",
+        "positive_prompt": "anime style, viking warriors in battle, masterpiece",
+        "negative_prompt": "low quality, blurry, bad anatomy, deformed",
+        "is_processed": true
+    },
+    {
+        "id": "0609",
+        "name": "표트르 대제",
+        "image": "2d/base_img.png",
+        "positive_prompt": "beautiful african woman with blue hair, 1 girl",
+        "negative_prompt": "low quality, blurry, bad anatomy, deformed",
+        "is_processed": true
+    }
+]
