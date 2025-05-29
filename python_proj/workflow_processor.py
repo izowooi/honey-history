@@ -24,8 +24,10 @@ class WorkflowProcessor(ABC):
         url = f"{self.comfyui_url}/upload/image"
         
         with open(image_path, 'rb') as f:
+            # 파일명에 2d 폴더 경로 추가
+            filename = os.path.basename(image_path)
             files = {
-                'image': (os.path.basename(image_path), f, 'image/png'),
+                'image': (f"2d/{filename}", f, 'image/png'),
                 'overwrite': (None, 'true')
             }
             
