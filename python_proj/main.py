@@ -4,6 +4,7 @@ import urllib.parse
 import uuid
 import websocket
 import time
+from workflow_processor import WorkflowProcessorFactory
 
 # ComfyUI 서버 주소
 server_address = "192.168.50.213:8188"
@@ -12,7 +13,15 @@ server_address = "192.168.50.213:8188"
 def queue_prompt(prompt):
     """프롬프트를 큐에 추가하고 prompt_id 반환"""
     p = {"prompt": prompt}
-    data = json.dumps(p).encode('utf-8')
+    try:
+        # 기본 JSON 직렬화 시도
+        data = json.dumps(p).encode('utf-8')
+    except Exception as e:
+        print(f"기본 JSON 직렬화 실패: {e}")
+        # 대체 방법: 수동으로 JSON 문자열 생성
+        prompt_str = json.dumps(prompt)
+        data = f'{{"prompt":{prompt_str}}}'.encode('utf-8')
+    
     req = urllib.request.Request(f"http://{server_address}/prompt", data=data)
     return json.loads(urllib.request.urlopen(req).read())
 
@@ -31,17 +40,13 @@ def get_history(prompt_id):
         return json.loads(response.read())
 
 
-def generate_image(workflow_json):
+def generate_image(processor, prompt_data):
     """이미지 생성 메인 함수"""
-    # JSON 파일 로드
-    with open(workflow_json, 'r') as f:
-        prompt = json.load(f)
-
-    # 필요시 프롬프트 수정
-    # 예: prompt["6"]["inputs"]["text"] = "새로운 프롬프트"
-
-    # 프롬프트 실행
-    prompt_id = queue_prompt(prompt)['prompt_id']
+    # 프롬프트 수정
+    processor.modify_prompt(prompt_data)
+    
+    # 수정된 워크플로우로 이미지 생성
+    prompt_id = queue_prompt(processor.get_workflow())['prompt_id']
 
     # 완료 대기
     while True:
@@ -70,14 +75,32 @@ def generate_image(workflow_json):
 
 # 사용 예시
 if __name__ == "__main__":
-    # Export한 workflow JSON 파일 경로
-    workflow_file = "Lesson2.json"
+    # prompts.json 파일 로드
+    with open('prompts.json', 'r', encoding='utf-8') as f:
+        prompts = json.load(f)
 
-    # 이미지 생성
-    generated_images = generate_image(workflow_file)
+    # 워크플로우 처리기 생성
+    workflow_file = "test_01.json"
+    processor = WorkflowProcessorFactory.create_processor(workflow_file)
 
-    # 이미지 저장
-    for idx, image_data in enumerate(generated_images):
-        with open(f"output_{idx}.png", "wb") as f:
-            f.write(image_data)
-        print(f"이미지 저장됨: output_{idx}.png")
+    # is_processed가 false인 항목만 처리
+    for prompt in prompts:
+        if not prompt['is_processed']:
+            print(f"처리 중: {prompt['name']} (ID: {prompt['id']})")
+            
+            # 이미지 생성
+            generated_images = generate_image(processor, prompt)
+
+            # 이미지 저장 (ID를 파일명에 포함)
+            for idx, image_data in enumerate(generated_images):
+                output_filename = f"{prompt['id']}_{idx}.png"
+                with open(output_filename, "wb") as f:
+                    f.write(image_data)
+                print(f"이미지 저장됨: {output_filename}")
+
+            # 처리 완료 표시
+            prompt['is_processed'] = True
+
+    # 처리 상태 저장
+    with open('prompts.json', 'w', encoding='utf-8') as f:
+        json.dump(prompts, f, ensure_ascii=False, indent=4)
