@@ -75,6 +75,22 @@ class Test02WorkflowProcessor(WorkflowProcessor):
         self.workflow_data["16"]["inputs"]["text"] = prompt_data["negative_prompt"]
 
 
+class Test03WorkflowProcessor(WorkflowProcessor):
+    """test_03.json 워크플로우 처리기"""
+
+    def modify_prompt(self, prompt_data):
+        # 이미지 파일 업로드 및 수정 (node 17)
+        if "image" in prompt_data:
+            uploaded_filename = self.upload_image(prompt_data["image"])
+            self.workflow_data["7"]["inputs"]["image"] = uploaded_filename
+
+        # 긍정 프롬프트 수정 (node 15)
+        self.workflow_data["5"]["inputs"]["prompt"] = prompt_data["positive_prompt"]
+
+        # 부정 프롬프트 수정 (node 16)
+        self.workflow_data["4"]["inputs"]["text"] = prompt_data["negative_prompt"]
+
+
 class WildcardAnimationWorkflowProcessor(WorkflowProcessor):
     """wildcard_animation.json 워크플로우 처리기"""
     
@@ -100,6 +116,8 @@ class WorkflowProcessorFactory:
             return Test01WorkflowProcessor(workflow_file, comfyui_url)
         if workflow_file == "test_02.json":
             return Test02WorkflowProcessor(workflow_file, comfyui_url)
+        if workflow_file == "test_03.json":
+            return Test03WorkflowProcessor(workflow_file, comfyui_url)
         elif workflow_file == "wildcard_animation.json":
             return WildcardAnimationWorkflowProcessor(workflow_file, comfyui_url)
         else:
