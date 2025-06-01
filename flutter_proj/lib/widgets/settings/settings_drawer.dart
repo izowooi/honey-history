@@ -35,7 +35,7 @@ class SettingsDrawer extends ConsumerWidget {
             value: notificationEnabled,
             onChanged: (bool? value) {
               if (value != null) {
-                ref.read(notificationEnabledProvider.notifier).state = value;
+                ref.read(notificationEnabledProvider.notifier).setValue(value);
               }
             },
           ),
@@ -45,7 +45,7 @@ class SettingsDrawer extends ConsumerWidget {
             value: showMovies,
             onChanged: (bool? value) {
               if (value != null) {
-                ref.read(showMoviesProvider.notifier).state = value;
+                ref.read(showMoviesProvider.notifier).setValue(value);
               }
             },
           ),
@@ -66,7 +66,7 @@ class SettingsDrawer extends ConsumerWidget {
             groupValue: fontSizeScale,
             onChanged: (value) {
               if (value != null) {
-                ref.read(fontSizeScaleProvider.notifier).state = value;
+                ref.read(fontSizeScaleProvider.notifier).setValue(value);
               }
             },
           ),
@@ -76,7 +76,7 @@ class SettingsDrawer extends ConsumerWidget {
             groupValue: fontSizeScale,
             onChanged: (value) {
               if (value != null) {
-                ref.read(fontSizeScaleProvider.notifier).state = value;
+                ref.read(fontSizeScaleProvider.notifier).setValue(value);
               }
             },
           ),
@@ -86,7 +86,7 @@ class SettingsDrawer extends ConsumerWidget {
             groupValue: fontSizeScale,
             onChanged: (value) {
               if (value != null) {
-                ref.read(fontSizeScaleProvider.notifier).state = value;
+                ref.read(fontSizeScaleProvider.notifier).setValue(value);
               }
             },
           ),
@@ -108,7 +108,7 @@ class SettingsDrawer extends ConsumerWidget {
             groupValue: useDetailedContent,
             onChanged: (value) {
               if (value != null) {
-                ref.read(useDetailedContentProvider.notifier).state = value;
+                ref.read(useDetailedContentProvider.notifier).setValue(value);
               }
             },
           ),
@@ -119,7 +119,7 @@ class SettingsDrawer extends ConsumerWidget {
             groupValue: useDetailedContent,
             onChanged: (value) {
               if (value != null) {
-                ref.read(useDetailedContentProvider.notifier).state = value;
+                ref.read(useDetailedContentProvider.notifier).setValue(value);
               }
             },
           ),
@@ -140,7 +140,7 @@ class SettingsDrawer extends ConsumerWidget {
             value: isDebug,
             onChanged: (bool? value) {
               if (value != null) {
-                ref.read(isDebugProvider.notifier).state = value;
+                ref.read(isDebugProvider.notifier).setValue(value);
               }
             },
           ),
