@@ -70,6 +70,7 @@ flutter:
     - assets/data/movies.json
     - assets/illustration/
     - assets/audio/
+    - assets/default.realm
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
