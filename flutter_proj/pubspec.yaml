@@ -39,6 +39,8 @@ dependencies:
   youtube_player_flutter: ^8.1.2
   shared_preferences: ^2.5.3
   just_audio: ^0.9.46
+  realm: ^20.0.1
+  realm_dart: ^20.0.1
 
 dev_dependencies:
   flutter_test:
