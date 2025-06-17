@@ -127,3 +127,4 @@ python_proj/.idea/vcs.xml
 python_proj/.idea/inspectionProfiles/profiles_settings.xml
 python_proj/.idea/inspectionProfiles/Project_Default.xml
 python_proj/.idea/vcs.xml
+python_gen_script/credentials.json
