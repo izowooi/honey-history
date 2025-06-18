@@ -1,1 +1,2 @@
 gspread==6.2.1
+openai==1.88.0
