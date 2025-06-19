@@ -65,7 +65,8 @@ class OpenAIService:
             print(f"❌ OpenAI API 호출 실패: {e}")
             return {
                 'simple': f'{topic}에 대한 간단한 설명을 생성할 수 없습니다.',
-                'detail': f'{topic}에 대한 상세한 설명을 생성할 수 없습니다.'
+                'detail': f'{topic}에 대한 상세한 설명을 생성할 수 없습니다.',
+                'year': '연도 추출 실패'
             }
 
     def _create_user_prompt(self, topic: str, date: str = "") -> str:
@@ -76,7 +77,7 @@ class OpenAIService:
 
 조건
 • 첫 문장은 반드시 날짜의 의미를 포함하고, AI가 찾아낸 연도와 <DATE>를 활용해 다양하게 시작하세요. 
- 예: "오늘, 1885년 7월 6일의 OO에서는…", "1832년 7월 6일의 OO에서는…", "바로 오늘(7월 6일), …", "1885년 7월 6일…". 
+ 예: "1885년 7월 6일의 OO에서는…", "1832년 7월 6일의 OO에서는…", "바로 오늘(7월 6일), …", "1885년 7월 6일…". 
 • 번호, 글머리표, 하이픈을 절대 쓰지 말고 자연스러운 문단으로만 서술하세요. 
 • 적절한 이모지를 섞어 흥미를 높여주세요. 
 • 첫 번째 버전은 초등학생 눈높이에 맞춰 300자 내외로 짧고 간단하게 작성하세요. 
@@ -85,7 +86,8 @@ class OpenAIService:
 
 {{
  "simple": "<300자 내외 문단>",
- "detail": "<1500자 내외 문단>"
+ "detail": "<1500자 내외 문단>",
+ "year": "<AI가 찾아낸 연도>",
 }}'''
 
         return prompt
@@ -103,7 +105,8 @@ class OpenAIService:
 
             return {
                 'simple': parsed.get('simple', ''),
-                'detail': parsed.get('detail', '')
+                'detail': parsed.get('detail', ''),
+                'year': parsed.get('year', '')
             }
 
         except json.JSONDecodeError as e:
@@ -119,47 +122,34 @@ class OpenAIService:
             # "simple": "..." 패턴 찾기
             simple_pattern = r'"simple":\s*"([^"]*(?:\\.[^"]*)*)"'
             detail_pattern = r'"detail":\s*"([^"]*(?:\\.[^"]*)*)"'
+            year_pattern = r'"year":\s*"([^"]*)"'
 
             simple_match = re.search(simple_pattern, content, re.DOTALL)
             detail_match = re.search(detail_pattern, content, re.DOTALL)
+            year_match = re.search(year_pattern, content)
 
             simple_text = simple_match.group(1) if simple_match else '추출 실패'
             detail_text = detail_match.group(1) if detail_match else '추출 실패'
+            year_text = year_match.group(1) if year_match else '추출 실패'
 
             # 이스케이프 문자 처리
             simple_text = simple_text.replace('\\"', '"').replace('\\n', '\n')
             detail_text = detail_text.replace('\\"', '"').replace('\\n', '\n')
+            year_text = year_text.replace('\\"', '"').replace('\\n', '\n')
 
             return {
                 'simple': simple_text,
-                'detail': detail_text
+                'detail': detail_text,
+                'year': year_text
             }
 
         except Exception as e:
             print(f"❌ 텍스트 추출 실패: {e}")
             return {
                 'simple': '내용 추출 실패',
-                'detail': '내용 추출 실패'
+                'detail': '내용 추출 실패',
+                'year': '연도 추출 실패'
             }
-
-    def extract_year_from_content(self, content_dict: Dict[str, str]) -> str:
-        """생성된 컨텐츠에서 연도 추출"""
-        try:
-            # simple과 detail 모두에서 연도 찾기
-            text = content_dict.get('simple', '') + ' ' + content_dict.get('detail', '')
-
-            # 4자리 연도 패턴 찾기
-            year_pattern = r'\b(1\d{3}|20\d{2})\b'
-            matches = re.findall(year_pattern, text)
-
-            if matches:
-                # 가장 처음 나온 연도 반환
-                return matches[0]
-
-            return ''
-
-        except Exception:
-            return ''
 
 
 def test_openai_service():
@@ -194,10 +184,7 @@ def test_openai_service():
             print(result['detail'])
             print(f"📏 길이: {len(result['detail'])}자")
 
-            # 연도 추출 테스트
-            extracted_year = service.extract_year_from_content(result)
-            print(f"\n📅 추출된 연도: {extracted_year}")
-
+            print(f"\n📅 AI가 찾아낸 연도: {result['year']}")
         except Exception as e:
             print(f"❌ 테스트 실패: {e}")
 
