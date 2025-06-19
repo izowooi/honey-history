@@ -77,8 +77,8 @@
   },
   "14": {
     "inputs": {
-      "width": 1024,
-      "height": 1024,
+      "width": 1600,
+      "height": 900,
       "interpolation": "lanczos",
       "method": "fill / crop",
       "condition": "always",
@@ -96,7 +96,7 @@
   "15": {
     "inputs": {
       "preprocessor": "AnimeLineArtPreprocessor",
-      "resolution": 1024,
+      "resolution": 512,
       "image": [
         "14",
         0
@@ -173,7 +173,7 @@
   "9:0": {
     "inputs": {
       "seed": 97308162818375,
-      "steps": 3,
+      "steps": 30,
       "cfg": 7,
       "sampler_name": "dpmpp_2m",
       "scheduler": "karras",

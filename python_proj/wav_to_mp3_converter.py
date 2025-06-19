@@ -25,7 +25,7 @@ def convert_wav_to_mp3(input_folder):
 
             # 이미 변환된 파일이 있는지 확인
             if os.path.exists(mp3_path):
-                # print(f"건너뛰기: {mp3_filename} (이미 존재함)")
+                print(f"건너뛰기: {mp3_filename} (이미 존재함)")
                 continue
 
             try:

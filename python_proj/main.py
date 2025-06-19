@@ -80,7 +80,7 @@ if __name__ == "__main__":
         prompts = json.load(f)
 
     # 워크플로우 처리기 생성
-    workflow_file = "test_01.json"
+    workflow_file = "test_03.json"
     processor = WorkflowProcessorFactory.create_processor(workflow_file)
 
     # is_processed가 false인 항목만 처리

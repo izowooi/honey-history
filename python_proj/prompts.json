@@ -1,11 +1,11 @@
 [
     {
-        "id": "0608",
-        "name": "바이킹 습격",
-        "image": "0608.png",
-        "positive_prompt": "anime style, viking warriors in battle, masterpiece",
-        "negative_prompt": "low quality, blurry, bad anatomy, deformed",
-        "is_processed": true
+        "id": "0603",
+        "name": "아편전쟁",
+        "image": "2d/0603.png",
+        "positive_prompt": "(anime style:1.3), historical battle scene, Chinese soldiers in blue robes with yellow conical hats, European soldiers in red and white uniforms, musket warfare, smoke and gunpowder, fortress walls in background, dynamic action poses, dramatic lighting, studio ghibli style, detailed military uniforms, 19th century warfare, epic battle composition, high quality, masterpiece",
+        "negative_prompt": "realistic, photorealistic, 3d render, low quality, blurry, modern weapons, contemporary setting, deformed hands, bad anatomy",
+        "is_processed": false
     },
     {
         "id": "0609",
