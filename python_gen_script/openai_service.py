@@ -8,7 +8,8 @@ import json
 import re
 from typing import Dict, Optional
 from openai import OpenAI, api_key
-
+from dotenv import load_dotenv
+import os
 
 class OpenAIService:
     """OpenAI API 서비스 클래스"""
@@ -165,8 +166,10 @@ def test_openai_service():
     """OpenAI 서비스 테스트 함수"""
     print("🤖 OpenAI 서비스 테스트 시작")
 
+    load_dotenv()
+    api_key = os.getenv('OPENAI_API_KEY')
+    print(f"📌 OPENAI_API_KEY: {api_key}")
     # 서비스 초기화
-    api_key = ""
     service = OpenAIService(api_key)
 
     # 테스트 주제들
