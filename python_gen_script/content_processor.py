@@ -14,15 +14,15 @@ class ContentGenerator(ABC):
     """컨텐츠 생성기 인터페이스"""
 
     @abstractmethod
-    def generate_content(self, title: str) -> Dict[str, str]:
-        """제목을 기반으로 컨텐츠 생성"""
+    def generate_content(self, title: str, date: str = "") -> Dict[str, str]:
+        """제목과 날짜를 기반으로 컨텐츠 생성"""
         pass
 
 
 class DummyContentGenerator(ContentGenerator):
     """더미 컨텐츠 생성기 (테스트용)"""
 
-    def generate_content(self, title: str) -> Dict[str, str]:
+    def generate_content(self, title: str, date: str = "") -> Dict[str, str]:
         """더미 데이터로 컨텐츠 생성"""
         if not title or not title.strip():
             return {
@@ -67,17 +67,17 @@ class DummyContentGenerator(ContentGenerator):
         return '2000'  # 기본값
 
 
-class OpenAIContentGenerator(ContentGenerator):
-    """OpenAI API를 사용한 컨텐츠 생성기 (향후 구현용)"""
-
-    def __init__(self, api_key: str):
-        self.api_key = api_key
-        # TODO: OpenAI 클라이언트 초기화
-
-    def generate_content(self, title: str) -> Dict[str, str]:
-        """OpenAI API로 컨텐츠 생성"""
-        # TODO: OpenAI API 호출 구현
-        raise NotImplementedError("OpenAI 연동은 아직 구현되지 않았습니다.")
+# OpenAI 컨텐츠 생성기는 별도 파일에서 import
+try:
+    from openai_content_generator import OpenAIContentGenerator
+except ImportError:
+    # OpenAI 모듈이 없을 때를 위한 fallback
+    class OpenAIContentGenerator(ContentGenerator):
+        def __init__(self):
+            raise ImportError("OpenAI 모듈을 사용하려면 openai_content_generator.py가 필요합니다.")
+        
+        def generate_content(self, title: str, date: str = "") -> Dict[str, str]:
+            raise NotImplementedError("OpenAI 연동이 설정되지 않았습니다.")
 
 
 class ContentProcessor:
@@ -86,12 +86,12 @@ class ContentProcessor:
     def __init__(self, content_generator: ContentGenerator):
         self.content_generator = content_generator
 
-    def process_title(self, title: str) -> Dict[str, str]:
-        """제목을 처리하여 컨텐츠 생성"""
+    def process_title(self, title: str, date: str = "") -> Dict[str, str]:
+        """제목과 날짜를 처리하여 컨텐츠 생성"""
         try:
-            return self.content_generator.generate_content(title)
+            return self.content_generator.generate_content(title, date)
         except Exception as e:
-            print(f"컨텐츠 생성 실패 (제목: {title}): {e}")
+            print(f"컨텐츠 생성 실패 (제목: {title}, 날짜: {date}): {e}")
             return {
                 'year': '',
                 'content_simple': '생성 실패',

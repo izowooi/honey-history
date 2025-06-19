@@ -6,7 +6,7 @@ Dependency Inversion Principle: 구체 클래스가 아닌 인터페이스에 �
 """
 
 from sheets_service import SheetsService
-from content_processor import ContentProcessor, DummyContentGenerator
+from content_processor import ContentProcessor, DummyContentGenerator, OpenAIContentGenerator
 from config import SHEET_NAMES, DATA_START_ROW, FILL_COLUMNS
 from typing import List
 
@@ -73,15 +73,23 @@ class SheetProcessor:
 
         # 컨텐츠 생성
         title = row_data['title']
-        print(f"🔄 {row_num}행 처리 중: '{title}'")
+        date = row_data.get('id', '')  # ID 컬럼을 날짜로 사용 (예: "09-01")
+        
+        print(f"🔄 {row_num}행 처리 중: '{title}' (날짜: {date})")
 
-        generated_content = self.content_processor.process_title(title)
+        # OpenAI API 호출하여 컨텐츠 생성
+        generated_content = self.content_processor.process_title(title, date)
 
-        # 빈 필드만 업데이트
+        # OpenAI 응답을 시트 컬럼에 맞게 매핑
         updates = {}
         for field in FILL_COLUMNS:
             if not row_data.get(field, '').strip():  # 빈 필드만
-                updates[field] = generated_content.get(field, '')
+                if field == 'year':
+                    updates[field] = generated_content.get('year', '')
+                elif field == 'content_simple':
+                    updates[field] = generated_content.get('simple', '')
+                elif field == 'content_detailed':
+                    updates[field] = generated_content.get('detail', '')
 
         if updates:
             # 시트 업데이트
@@ -114,7 +122,15 @@ def main():
     try:
         # 의존성 주입 (Dependency Injection)
         sheets_service = SheetsService()
-        content_generator = DummyContentGenerator()  # 나중에 OpenAI로 교체 가능
+        
+        # OpenAI 컨텐츠 생성기 사용 (DummyContentGenerator 대신)
+        try:
+            content_generator = OpenAIContentGenerator()
+            print("🤖 OpenAI API를 사용한 컨텐츠 생성기 초기화 완료")
+        except Exception as e:
+            print(f"⚠️ OpenAI 초기화 실패, 더미 생성기로 대체: {e}")
+            content_generator = DummyContentGenerator()
+        
         content_processor = ContentProcessor(content_generator)
 
         # 메인 처리기 생성
