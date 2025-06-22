@@ -27,8 +27,16 @@ class OpenAIBatchService:
 
         # 시스템 프롬프트
         self.system_prompt = (
-            "당신은 세계사에 정통한 학자이자 스토리텔러입니다. "
-            "독자가 몰입할 수 있도록 생생하고 흥미로운 서술을 사용하세요."
+            """역할:
+            - 복잡한 역사를 흥미진진한 이야기로 풀어내는 역사 해설가
+            - 어린이부터 성인까지 모든 연령층이 이해할 수 있게 설명하는 교육자
+            - 과거와 현재를 연결하여 역사의 의미를 찾아주는 안내자
+
+            목표:
+            - 독자가 "와, 이런 일이 있었구나!"라고 감탄하게 만들기
+            - 역사적 사실을 정확하면서도 재미있게 전달하기
+            - 그 시대의 상황과 감정을 생생하게 느낄 수 있게 하기
+            """
         )
 
     def upload_batch_file(self, file_path: str = "batchinput.jsonl") -> str:
@@ -278,22 +286,44 @@ class OpenAIBatchService:
         """사용자 프롬프트 생성"""
         date_info = f"<DATE>{date}</DATE>\n" if date else ""
 
-        prompt = f'''{date_info}"{topic}"에 대해 두 가지 버전의 글을 작성해주세요.
+        prompt = f'''{date_info}오늘 {date}에 일어난 역사적 사건 또는 인물에 대해 "{topic}"를 소재로 두 가지 버전의 글을 작성해주세요.
 
-조건
-• 첫 문장은 반드시 날짜의 의미를 포함하고, AI가 찾아낸 연도와 <DATE>를 활용해 다양하게 시작하세요. 
- 예: "1885년 7월 6일의 OO에서는…", "1832년 7월 6일의 OO에서는…", "바로 오늘(7월 6일), …", "1885년 7월 6일…". 
-• 번호, 글머리표, 하이픈을 절대 쓰지 말고 자연스러운 문단으로만 서술하세요. 
-• 적절한 이모지를 섞어 흥미를 높여주세요. 
-• 첫 번째 버전은 초등학생 눈높이에 맞춰 300자 내외로 짧고 간단하게 작성하세요. 
-• 두 번째 버전은 고등학생 수준으로 1500자 내외이며 배경·전개·영향까지 깊이 있게 다뤄 주세요. 
-• 최종 출력은 아래 JSON 형식을 그대로 지켜 주세요(큰따옴표, 줄바꿈 유지).
+📝 작성 원칙
+- 마치 그 현장에 있었던 것처럼 생생하고 구체적으로 서술하세요
+- 당시 사람들의 감정과 상황을 상상할 수 있게 묘사하세요  
+- 현재 우리 삶과의 연관성이나 교훈도 자연스럽게 포함하세요
+- 번호나 글머리표 없이 자연스러운 문단으로만 구성하세요
+- 적절한 이모지로 흥미를 더해주세요.
+
+📚 두 가지 버전 요구사항
+
+**간단 버전 (Simple)**
+- 대상: 초등학생도 이해할 수 있는 수준
+- 길이: 250-350자 (모바일에서 읽기 좋은 길이)
+- 특징: 핵심만 간추려 호기심을 자극하는 "오늘의 한 입 역사"
+- 시작: 날짜와 함께 흥미로운 첫 문장으로 시작
+
+**상세 버전 (Detail)**
+- 대상: 중고등학생 이상 수준
+- 길이: 1300-1700자 (충분한 배경 설명 포함)
+- 구성: 배경 상황 → 사건 전개 → 결과와 영향 → 현재적 의미
+- 특징: 역사적 맥락과 인물의 심리까지 깊이 있게 다루기
+
+🎯 출력 형식
+반드시 아래 JSON 형식으로 정확히 출력하세요:
 
 {{
- "simple": "<300자 내외 문단>",
- "detail": "<1500자 내외 문단>",
- "year": "<AI가 찾아낸 연도>",
-}}'''
+ "simple": "<간단 버전 내용>",
+ "detail": "<상세 버전 내용>", 
+ "year": "<정확한 연도>",
+ "related_movies": "<관련 영화나 드라마를 쉼표로 구분하여 3-5개 (예: 영화제목1, 드라마제목2, 영화제목3)>"
+}}
+
+💡 참고사항
+- 정확한 역사적 사실에 기반하되, 스토리텔링으로 재미있게 전달하세요
+- 논란이 있는 사건의 경우 균형잡힌 시각으로 서술하세요  
+- 관련 영화/드라마는 해당 사건이나 인물을 직접적으로 다룬 작품들로 선별하세요
+- 관련 작품이 없거나 찾기 어려운 경우 "관련 작품 없음"으로 기재하세요'''
 
         return prompt
 
@@ -303,23 +333,28 @@ class OpenAIBatchService:
             simple_pattern = r'"simple":\s*"([^"]*(?:\\.[^"]*)*)"'
             detail_pattern = r'"detail":\s*"([^"]*(?:\\.[^"]*)*)"'
             year_pattern = r'"year":\s*"([^"]*)"'
+            movie_pattern = r'"related_movies":\s*"([^"]*(?:\\.[^"]*)*)"'
 
             simple_match = re.search(simple_pattern, content, re.DOTALL)
             detail_match = re.search(detail_pattern, content, re.DOTALL)
             year_match = re.search(year_pattern, content)
+            movie_match = re.search(movie_pattern, content, re.DOTALL)
 
             simple_text = simple_match.group(1) if simple_match else '추출 실패'
             detail_text = detail_match.group(1) if detail_match else '추출 실패'
             year_text = year_match.group(1) if year_match else '추출 실패'
+            movie_text = movie_match.group(1) if movie_match else '관련 작품 없음'
 
             simple_text = simple_text.replace('\\"', '"').replace('\\n', '\n')
             detail_text = detail_text.replace('\\"', '"').replace('\\n', '\n')
             year_text = year_text.replace('\\"', '"').replace('\\n', '\n')
+            movie_text = movie_text.replace('\\"', '"').replace('\\n', '\n')
 
             return {
                 'simple': simple_text,
                 'detail': detail_text,
-                'year': year_text
+                'year': year_text,
+                'related_movies': movie_text,
             }
 
         except Exception as e:
@@ -327,7 +362,8 @@ class OpenAIBatchService:
             return {
                 'simple': '내용 추출 실패',
                 'detail': '내용 추출 실패',
-                'year': '연도 추출 실패'
+                'year': '연도 추출 실패',
+                'related_movies': '관련 작품 없음'
             }
 
 def test_create_batch_input_file():
@@ -434,8 +470,8 @@ def create_batch_input_file(service: OpenAIBatchService, file_path: str = "batch
     """
     # 테스트 데이터 (제목과 날짜)
     test_data = [
-        {"title": "관동 대지진", "date": "09-01"},
-        {"title": "런던 대화재", "date": "09-02"}
+        {"title": "엘리자베스 2세 여왕 대관식", "date": "06-02"},
+        {"title": "1차 아편전쟁 촉발", "date": "06-03"}
     ]
     
     # 기존 파일이 있는지 확인
