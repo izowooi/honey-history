@@ -10,13 +10,12 @@ from dotenv import load_dotenv
 import os
 
 
-def check_batch_status(batch_id: str, download_results: bool = False):
+def check_batch_status(batch_id: str):
     """
     배치 상태 조회 및 결과 다운로드
     
     Args:
         batch_id: 배치 작업 ID
-        download_results: 완료 시 결과 다운로드 여부
     """
     print("📊 배치 상태 조회기")
     print("=" * 50)
@@ -38,15 +37,21 @@ def check_batch_status(batch_id: str, download_results: bool = False):
     if status.get('status') == 'completed':
         print("🎉 배치 완료!")
         
-        if download_results:
-            print("📥 결과 다운로드 중...")
-            results = service.download_results(batch_id)
+        # 결과 파일명 생성
+        result_filename = f"processed_results_{batch_id}.json"
+        
+        # 파일이 이미 존재하는지 확인
+        if os.path.exists(result_filename):
+            print(f"📁 결과 파일이 이미 존재합니다: {result_filename}")
+            print("💡 기존 파일을 사용합니다. 새로 다운로드하지 않습니다.")
             
-            if results:
-                # 결과 저장
-                saved_file = service.save_processed_results(results)
-                print(f"✅ 총 {len(results)}개 결과 처리 완료")
-                print(f"💾 저장된 파일: {saved_file}")
+            # 기존 파일에서 결과 읽기
+            try:
+                with open(result_filename, 'r', encoding='utf-8') as f:
+                    import json
+                    results = json.load(f)
+                
+                print(f"✅ 기존 파일에서 {len(results)}개 결과를 불러왔습니다.")
                 
                 # 결과 미리보기
                 print(f"\n📋 결과 미리보기:")
@@ -58,11 +63,15 @@ def check_batch_status(batch_id: str, download_results: bool = False):
                     print(f"Detail: {content['detail'][:100]}...")
                     print(f"Year: {content['year']}")
                     print(f"Movies: {content['related_movies']}")
-            else:
-                print("❌ 결과 다운로드에 실패했습니다.")
+                    
+            except Exception as e:
+                print(f"❌ 기존 파일 읽기 실패: {e}")
+                print("📥 새로 다운로드를 시도합니다...")
+                download_and_save_results(service, batch_id, result_filename)
         else:
-            print("💡 결과를 다운로드하려면 --download 옵션을 추가하세요.")
-            
+            print("📥 결과 다운로드 중...")
+            download_and_save_results(service, batch_id, result_filename)
+
     else:
         print(f"\n📋 배치 상태 상세 정보:")
         print("-" * 50)
@@ -93,15 +102,45 @@ def check_batch_status(batch_id: str, download_results: bool = False):
         print(f"\n⏳ 배치가 아직 완료되지 않았습니다. 나중에 다시 확인해주세요.")
 
 
+def download_and_save_results(service: OpenAIBatchService, batch_id: str, filename: str):
+    """
+    결과 다운로드 및 저장
+    
+    Args:
+        service: OpenAIBatchService 인스턴스
+        batch_id: 배치 작업 ID
+        filename: 저장할 파일명
+    """
+    results = service.download_results(batch_id)
+
+    if results:
+        # 결과 저장 (파일명 지정)
+        saved_file = service.save_processed_results(results, filename)
+        print(f"✅ 총 {len(results)}개 결과 처리 완료")
+        print(f"💾 저장된 파일: {saved_file}")
+
+        # 결과 미리보기
+        print(f"\n📋 결과 미리보기:")
+        for i, result in enumerate(results[:2], 1):  # 처음 2개만 표시
+            print(f"\n--- 결과 {i} ---")
+            print(f"Custom ID: {result['custom_id']}")
+            content = result['content']
+            print(f"Simple: {content['simple'][:100]}...")
+            print(f"Detail: {content['detail'][:100]}...")
+            print(f"Year: {content['year']}")
+            print(f"Movies: {content['related_movies']}")
+    else:
+        print("❌ 결과 다운로드에 실패했습니다.")
+
+
 def main():
     """메인 함수"""
     parser = argparse.ArgumentParser(description='배치 상태 조회 및 결과 다운로드')
     parser.add_argument('--batch-id', required=True, help='배치 작업 ID')
-    parser.add_argument('--download', action='store_true', help='완료 시 결과 다운로드')
-    
+
     args = parser.parse_args()
     
-    check_batch_status(args.batch_id, args.download)
+    check_batch_status(args.batch_id)
 
 
 if __name__ == "__main__":
