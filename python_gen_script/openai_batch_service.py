@@ -390,7 +390,7 @@ def test_batch_status():
     service = OpenAIBatchService(api_key)
 
     # 여기에 실제 배치 ID를 입력하세요
-    batch_id = "batch_685437e7c1988190bebb1a90ba6f06b8"
+    batch_id = "batch_685819c12b5081908aa0c18389109318"
 
     print(f"📊 배치 {batch_id} 상태 확인 중...")
     status = service.check_batch_status(batch_id)
@@ -441,10 +441,11 @@ def test_batch_service():
 
     gpt_4_1_nano = "gpt-4.1-nano-2025-04-14" # ( )
     o4_mini = "o4-mini-2025-04-16"  # 비용 효율적 추론 모델 (input 1.1, output 4.4)
-    model_4_1 = "gpt-4.1-mini-2025-04-14"# 균형 모델 (input 2, output 8)
+    model_4_1_mini = "gpt-4.1-mini-2025-04-14"# 비용 효율적 균형 모델 (input 0.4, output 1.6)
+    model_4_1 = "gpt-4.1-2025-04-14"  # 플래그십 균형 모델 (input 2, output 8)
     o3 = "o3-2025-04-16"  # 가장 강력한 추론 모델 (추론 input 2, output 8)
     # 서비스 초기화
-    service = OpenAIBatchService(api_key, model=o4_mini)
+    service = OpenAIBatchService(api_key, model=model_4_1_mini)
 
     # 방법 1: 전체 프로세스 한 번에
     print("\n=== 전체 프로세스 실행 ===")
@@ -563,6 +564,6 @@ def check_existing_batch():
 
 
 if __name__ == "__main__":
-    test_create_batch_input_file()
-    # test_batch_service()
-    # test_batch_status()
+    #test_create_batch_input_file()
+    #test_batch_service()
+    test_batch_status()
