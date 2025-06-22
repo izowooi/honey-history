@@ -389,12 +389,12 @@ def test_batch_service():
     load_dotenv()
     api_key = os.getenv('OPENAI_API_KEY')
 
+    gpt_4_1_nano = "gpt-4.1-nano-2025-04-14" # ( )
+    o4_mini = "o4-mini-2025-04-16"  # 비용 효율적 추론 모델 (input 1.1, output 4.4)
+    model_4_1 = "gpt-4.1-mini-2025-04-14"# 균형 모델 (input 2, output 8)
+    o3 = "o3-2025-04-16"  # 가장 강력한 추론 모델 (추론 input 2, output 8)
     # 서비스 초기화
-    service = OpenAIBatchService(api_key)
-
-    # 배치 입력 파일 생성
-    # print("\n📝 배치 입력 파일 생성 중...")
-    # create_batch_input_file(service)
+    service = OpenAIBatchService(api_key, model=o4_mini)
 
     # 방법 1: 전체 프로세스 한 번에
     print("\n=== 전체 프로세스 실행 ===")
