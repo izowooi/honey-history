@@ -330,6 +330,20 @@ class OpenAIBatchService:
                 'year': '연도 추출 실패'
             }
 
+def test_create_batch_input_file():
+    """배치 서비스 테스트"""
+    print("🚀 OpenAI Batch 서비스 테스트")
+
+    load_dotenv()
+    api_key = os.getenv('OPENAI_API_KEY')
+
+    # 서비스 초기화
+    service = OpenAIBatchService(api_key)
+
+    # 배치 입력 파일 생성
+    print("\n📝 배치 입력 파일 생성 중...")
+    create_batch_input_file(service)
+
 
 def test_batch_status():
     """배치 상태 확인 테스트"""
@@ -513,5 +527,6 @@ def check_existing_batch():
 
 
 if __name__ == "__main__":
+    test_create_batch_input_file()
     # test_batch_service()
-    test_batch_status()
+    # test_batch_status()
