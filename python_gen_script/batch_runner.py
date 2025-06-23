@@ -74,8 +74,7 @@ def main():
     
     if batch_id:
         print(f"\n🎯 다음 단계:")
-        print(f"1. 배치 상태 확인: python batch_status_checker.py --batch-id {batch_id}")
-        print(f"2. 완료되면 결과 다운로드: python batch_status_checker.py --batch-id {batch_id} --download")
+        print(f"- 배치 상태 확인 및 다운로드 : python batch_status_checker.py --batch-id {batch_id}")
 
 
 if __name__ == "__main__":

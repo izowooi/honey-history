@@ -6,6 +6,7 @@ Single Responsibility Principle: 배치 입력 파일 생성만 담당
 
 import json
 import os
+import argparse
 from openai_batch_service import OpenAIBatchService
 from dotenv import load_dotenv
 
@@ -90,8 +91,13 @@ def create_batch_input_file(service: OpenAIBatchService, file_path: str = "batch
         print(f"❌ 파일 생성 실패: {e}")
 
 
-def main():
-    """메인 함수"""
+def generate_batch_file(model: str = "gpt-4.1-mini-2025-04-14"):
+    """
+    배치 파일 생성 메인 함수
+    
+    Args:
+        model: 사용할 모델명
+    """
     print("📝 배치 입력 파일 생성기")
     print("=" * 50)
     
@@ -103,11 +109,25 @@ def main():
         print("❌ OPENAI_API_KEY가 설정되지 않았습니다.")
         return
     
-    # 서비스 초기화
-    service = OpenAIBatchService(api_key)
+    # 서비스 초기화 (모델명 전달)
+    service = OpenAIBatchService(api_key, model=model)
+    
+    print(f"🤖 사용 모델: {model}")
     
     # 배치 입력 파일 생성
     create_batch_input_file(service)
+
+
+def main():
+    """메인 함수"""
+    parser = argparse.ArgumentParser(description='배치 입력 파일 생성')
+    parser.add_argument('--model', 
+                       default="gpt-4.1-mini-2025-04-14",
+                       help='사용할 모델명 (기본값: gpt-4.1-mini-2025-04-14)')
+    
+    args = parser.parse_args()
+    
+    generate_batch_file(args.model)
 
 
 if __name__ == "__main__":
