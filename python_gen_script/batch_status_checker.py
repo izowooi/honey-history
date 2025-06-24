@@ -37,8 +37,11 @@ def check_batch_status(batch_id: str):
     if status.get('status') == 'completed':
         print("🎉 배치 완료!")
         
-        # 결과 파일명 생성
-        result_filename = f"processed_results_{batch_id}.json"
+        # out 폴더 생성 (없으면 생성)
+        os.makedirs('out', exist_ok=True)
+        
+        # 결과 파일명 생성 (out 폴더 아래에 저장)
+        result_filename = f"out/processed_results_{batch_id}.json"
         
         # 파일이 이미 존재하는지 확인
         if os.path.exists(result_filename):
