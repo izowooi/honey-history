@@ -15,7 +15,7 @@ import os
 class OpenAIBatchService:
     """OpenAI Batch API 서비스 클래스"""
 
-    def __init__(self, api_key: str, model: str = "gpt-4.1-nano-2025-04-14"):
+    def __init__(self, api_key: str, model: str = "gpt-4.1-2025-04-14"):
         """
         OpenAI Batch 서비스 초기화
 

@@ -39,7 +39,7 @@ def run_batch_job(file_path: str = "batchinput.jsonl", description: str = "Histo
     o3 = "o3-2025-04-16"  # 가장 강력한 추론 모델 (input 2, output 8)
     
     # 서비스 초기화 (기본값: gpt-4.1-mini)
-    service = OpenAIBatchService(api_key, model=model_4_1_mini)
+    service = OpenAIBatchService(api_key, model=model_4_1)
     
     # 파일 존재 확인
     if not os.path.exists(file_path):

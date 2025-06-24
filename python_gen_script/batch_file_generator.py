@@ -91,7 +91,7 @@ def create_batch_input_file(service: OpenAIBatchService, file_path: str = "batch
         print(f"❌ 파일 생성 실패: {e}")
 
 
-def generate_batch_file(model: str = "gpt-4.1-mini-2025-04-14"):
+def generate_batch_file(model: str = "gpt-4.1-2025-04-14"):
     """
     배치 파일 생성 메인 함수
     
@@ -122,8 +122,8 @@ def main():
     """메인 함수"""
     parser = argparse.ArgumentParser(description='배치 입력 파일 생성')
     parser.add_argument('--model', 
-                       default="gpt-4.1-mini-2025-04-14",
-                       help='사용할 모델명 (기본값: gpt-4.1-mini-2025-04-14)')
+                       default="gpt-4.1-2025-04-14",
+                       help='사용할 모델명 (기본값: gpt-4.1-2025-04-14)')
     
     args = parser.parse_args()
     
