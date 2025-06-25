@@ -38,8 +38,8 @@ def create_batch_input_file(service: OpenAIBatchService, test_data: dict, file_p
         title = event_data["title"]
         date = event_data["id"]
         
-        # custom_id 생성 (request-0602 형태)
-        custom_id = f"request-{date.replace('-', '')}"
+        # custom_id 생성 (06-02 형태)
+        custom_id = f"{date}"
         
         # 시스템 프롬프트
         system_content = service.system_prompt
