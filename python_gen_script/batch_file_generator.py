@@ -11,20 +11,15 @@ from openai_batch_service import OpenAIBatchService
 from dotenv import load_dotenv
 
 
-def create_batch_input_file(service: OpenAIBatchService, file_path: str = "batchinput.jsonl"):
+def create_batch_input_file(service: OpenAIBatchService, test_data: dict, file_path: str = "batchinput.jsonl"):
     """
     배치 입력 파일 생성
     
     Args:
         service: OpenAIBatchService 인스턴스
+        test_data: 처리할 데이터 딕셔너리 (키: 날짜, 값: 이벤트 정보)
         file_path: 생성할 파일 경로
     """
-    # 테스트 데이터 (제목과 날짜)
-    test_data = [
-        {"title": "엘리자베스 2세 여왕 대관식", "date": "06-02"},
-        {"title": "1차 아편전쟁 촉발", "date": "06-03"}
-    ]
-    
     # 기존 파일이 있는지 확인
     existing_lines = []
     if os.path.exists(file_path):
@@ -37,13 +32,13 @@ def create_batch_input_file(service: OpenAIBatchService, file_path: str = "batch
     
     # 새로운 요청들 생성
     new_requests = []
-    start_id = len(existing_lines) + 1
     
-    for i, data in enumerate(test_data, start_id):
-        title = data["title"]
-        date = data["date"]
+    # 객체의 키값들을 순회
+    for date_key, event_data in test_data.items():
+        title = event_data["title"]
+        date = event_data["id"]
         
-        # custom_id 생성 (request-0901 형태)
+        # custom_id 생성 (request-0602 형태)
         custom_id = f"request-{date.replace('-', '')}"
         
         # 시스템 프롬프트
@@ -91,12 +86,13 @@ def create_batch_input_file(service: OpenAIBatchService, file_path: str = "batch
         print(f"❌ 파일 생성 실패: {e}")
 
 
-def generate_batch_file(model: str = "gpt-4.1-2025-04-14"):
+def generate_batch_file(model: str = "gpt-4.1-2025-04-14", data_file: str = "historical_events (3).json"):
     """
     배치 파일 생성 메인 함수
     
     Args:
         model: 사용할 모델명
+        data_file: 읽어올 데이터 파일 경로
     """
     print("📝 배치 입력 파일 생성기")
     print("=" * 50)
@@ -109,13 +105,28 @@ def generate_batch_file(model: str = "gpt-4.1-2025-04-14"):
         print("❌ OPENAI_API_KEY가 설정되지 않았습니다.")
         return
     
+    # 데이터 파일 로드
+    try:
+        with open(data_file, 'r', encoding='utf-8') as f:
+            test_data = json.load(f)
+        print(f"📂 데이터 파일 로드 완료: {data_file} ({len(test_data)}개 항목)")
+    except FileNotFoundError:
+        print(f"❌ 데이터 파일을 찾을 수 없습니다: {data_file}")
+        return
+    except json.JSONDecodeError as e:
+        print(f"❌ JSON 파일 형식 오류: {e}")
+        return
+    except Exception as e:
+        print(f"❌ 데이터 파일 로드 실패: {e}")
+        return
+    
     # 서비스 초기화 (모델명 전달)
     service = OpenAIBatchService(api_key, model=model)
     
     print(f"🤖 사용 모델: {model}")
     
     # 배치 입력 파일 생성
-    create_batch_input_file(service)
+    create_batch_input_file(service, test_data)
 
 
 def main():
@@ -124,10 +135,13 @@ def main():
     parser.add_argument('--model', 
                        default="gpt-4.1-2025-04-14",
                        help='사용할 모델명 (기본값: gpt-4.1-2025-04-14)')
+    parser.add_argument('--data-file',
+                       default="historical_events.json",
+                       help='읽어올 데이터 파일 경로 (기본값: historical_events.json)')
     
     args = parser.parse_args()
     
-    generate_batch_file(args.model)
+    generate_batch_file(args.model, args.data_file)
 
 
 if __name__ == "__main__":
