@@ -10,6 +10,7 @@
 3. **배치 실행**: `batch_runner.py`를 실행하여 배치 요청을 실행합니다.
     - 콘솔 로그에서 배치 요청 ID를 확인할 수 있습니다.
     - [batches](https://platform.openai.com/batches) 페이지에서 배치 요청의 상태를 확인할 수 있습니다.
+    - 80개 요청시 20분 소요. ( gpt-4.1-2025-04-14 모델 기준 )
 4. **배치 상태 확인**: `batch_status_checker.py`를 실행하여 배치 요청의 상태를 확인합니다.
     - `--batch-id` 옵션에 위에서 얻은 배치 요청 ID를 인자로 넣어 api 결과를 json 형태로 받습니다.
     - 결과는 `out` 디렉토리에 `processed_results_batch_<배치 ID>.json` 파일로 저장됩니다.
