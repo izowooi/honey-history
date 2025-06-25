@@ -139,7 +139,9 @@ def download_and_save_results(service: OpenAIBatchService, batch_id: str, filena
 def main():
     """메인 함수"""
     parser = argparse.ArgumentParser(description='배치 상태 조회 및 결과 다운로드')
-    parser.add_argument('--batch-id', required=True, help='배치 작업 ID')
+    parser.add_argument('--batch-id'
+                        , default="batch_685bf51099f881909f38b5dc0b5e9c99"
+                        , help='배치 작업 ID')
 
     args = parser.parse_args()
     
