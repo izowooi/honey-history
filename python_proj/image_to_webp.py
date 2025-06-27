@@ -11,11 +11,12 @@ from pathlib import Path
 from PIL import Image
 import concurrent.futures
 from tqdm import tqdm
+import shutil
 
 
 def convert_to_webp(input_path, output_path, quality=85):
     """
-    이미지를 WebP 형식으로 변환
+    이미지를 WebP 형식으로 변환 또는 복사
 
     Args:
         input_path: 입력 이미지 경로
@@ -23,7 +24,12 @@ def convert_to_webp(input_path, output_path, quality=85):
         quality: WebP 품질 (1-100, 기본값 85)
     """
     try:
-        # 이미지 열기
+        # 이미 webp 파일인 경우 복사
+        if input_path.suffix.lower() in {'.webp'}:
+            shutil.copy2(input_path, output_path)
+            return True, f"복사 완료: {input_path.name} → {output_path.name}"
+        
+        # 다른 형식의 경우 webp로 변환
         with Image.open(input_path) as img:
             # RGBA 모드가 아닌 경우 RGB로 변환
             if img.mode not in ('RGB', 'RGBA'):
@@ -34,7 +40,7 @@ def convert_to_webp(input_path, output_path, quality=85):
 
         return True, f"변환 완료: {input_path.name} → {output_path.name}"
     except Exception as e:
-        return False, f"변환 실패: {input_path.name} - {str(e)}"
+        return False, f"처리 실패: {input_path.name} - {str(e)}"
 
 
 def process_images(folder_path, quality=85, max_workers=4):
@@ -63,19 +69,20 @@ def process_images(folder_path, quality=85, max_workers=4):
     output_folder.mkdir(exist_ok=True)
 
     # 지원하는 확장자 (대소문자 구분 없음)
-    extensions = {'.jpg', '.jpeg', '.png', '.JPG', '.JPEG', '.PNG'}
+    extensions = {'.jpg', '.jpeg', '.png', '.webp', '.JPG', '.JPEG', '.PNG', '.WEBP'}
 
     # 변환할 이미지 파일 찾기
     image_files = [f for f in folder_path.iterdir()
                    if f.is_file() and f.suffix in extensions]
 
     if not image_files:
-        print("변환할 이미지 파일이 없습니다.")
+        print("처리할 이미지 파일이 없습니다.")
         return
 
     print(f"\n{len(image_files)}개의 이미지 파일을 찾았습니다.")
     print(f"출력 폴더: {output_folder}")
-    print(f"WebP 품질: {quality}%\n")
+    print(f"WebP 품질: {quality}% (변환 시)")
+    print("※ 기존 WebP 파일은 그대로 복사됩니다.\n")
 
     # 성공/실패 카운터
     success_count = 0
@@ -92,7 +99,7 @@ def process_images(folder_path, quality=85, max_workers=4):
             futures.append(future)
 
         # 진행 상황 표시
-        with tqdm(total=len(futures), desc="변환 진행") as pbar:
+        with tqdm(total=len(futures), desc="처리 진행") as pbar:
             for future in concurrent.futures.as_completed(futures):
                 success, message = future.result()
                 if success:
@@ -103,7 +110,7 @@ def process_images(folder_path, quality=85, max_workers=4):
                 pbar.update(1)
 
     # 결과 출력
-    print(f"\n변환 완료!")
+    print(f"\n처리 완료!")
     print(f"성공: {success_count}개")
     if fail_count > 0:
         print(f"실패: {fail_count}개")
