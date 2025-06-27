@@ -128,3 +128,5 @@ python_proj/.idea/inspectionProfiles/profiles_settings.xml
 python_proj/.idea/inspectionProfiles/Project_Default.xml
 python_proj/.idea/vcs.xml
 python_gen_script/credentials.json
+/python_proj/image_files/image_output
+/python_proj/image_files_origin
