@@ -51,13 +51,18 @@ class HistoryContentWidget extends ConsumerWidget {
                 const SizedBox(height: 16),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: AspectRatio(
-                    aspectRatio: 16 / 16,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: double.infinity,
+                    ),
                     child: Image.asset(
                       event.imageUrl,
-                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      fit: BoxFit.fitWidth,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
+                          width: double.infinity,
+                          height: 200,
                           color: Colors.grey[300],
                           child: const Center(
                             child: Icon(Icons.image_not_supported, size: 40),
