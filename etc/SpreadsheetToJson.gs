@@ -28,6 +28,12 @@ function spreadsheetToJson() {
     // 각 열의 데이터를 처리
     for (let j = 0; j < headers.length; j++) {
       const header = headers[j];
+      
+      // 헤더가 "_"로 시작하면 건너뛰기
+      if (header.startsWith('_')) {
+        continue;
+      }
+      
       let value = row[j];
       
       // 숫자인 경우 숫자 타입으로 변환
@@ -58,7 +64,7 @@ function spreadsheetToJson() {
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
   ui.createMenu('✅👉JSON 변환👈✅')
-    .addItem('스프레드시트를 JSON으로 변환', 'showJson')
+    .addItem('스프레드시트를 JSON으로 변환(언더바 무시)', 'showJson')
     .addToUi();
 }
 
