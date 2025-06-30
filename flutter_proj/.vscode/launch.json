@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug gen_realm.dart",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/gen_realm.dart",
+            "console": "terminal",
+            "args": []
+        },
+        {
+            "name": "Debug Flutter App",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "flutterMode": "debug"
+        }
+    ]
+} 
