@@ -4,25 +4,60 @@ import 'history_event.dart';
 import 'dart:io';
 import 'dart:convert';
 
+// 데이터베이스 설정을 위한 상수들
+class RealmConfig {
+  // 데이터베이스 파일명 설정
+  static const String historyDbPath = 'history_events.realm';
+  static const String carDbPath = 'cars.realm';
+  static const String combinedDbPath = 'honey_history.realm';  // 통합 DB
+  
+  // 스키마 설정
+  static Configuration get historyConfig => Configuration.local(
+    [HistoryEvent.schema], 
+    path: historyDbPath
+  );
+  
+  static Configuration get carConfig => Configuration.local(
+    [Car.schema], 
+    path: carDbPath
+  );
+  
+  // 모든 스키마를 포함한 통합 설정
+  static Configuration get combinedConfig => Configuration.local(
+    [HistoryEvent.schema, Car.schema], 
+    path: combinedDbPath
+  );
+}
+
 createDefaultRealm() {
-  var config = Configuration.local([Car.schema]);
-  var realm = Realm(config);
+  print("🚗 Car 데이터베이스 생성: ${RealmConfig.carDbPath}");
+  var realm = Realm(RealmConfig.carConfig);
 
   var car = Car("Tesla", "Model Y", kilometers: 5);
   realm.write(() {
     realm.add(car);
   });
+  
+  realm.close();
+  print("✅ Car 데이터베이스 생성 완료");
 }
 
 testDefaultRealm() {
-  var config = Configuration.local([Car.schema]);
-  var realm = Realm(config);
+  print("🔍 Car 데이터베이스 테스트: ${RealmConfig.carDbPath}");
+  var realm = Realm(RealmConfig.carConfig);
   var cars = realm.all<Car>();
 
-  Car myCar = cars[0];
-  print("My car is ${myCar.make} model ${myCar.model}");
+  if (cars.isNotEmpty) {
+    Car myCar = cars[0];
+    print("My car is ${myCar.make} model ${myCar.model}");
 
-  cars = realm.all<Car>().query("make == 'Tesla'");
+    cars = realm.all<Car>().query("make == 'Tesla'");
+    print("Tesla cars found: ${cars.length}");
+  } else {
+    print("No cars in database");
+  }
+  
+  realm.close();
 }
 
 // JSON 데이터를 읽어서 HistoryEvent 객체들을 생성하는 함수
@@ -100,10 +135,9 @@ Future<List<HistoryEvent>> loadHistoryEventsFromJson() async {
 // HistoryEvent용 Realm 데이터베이스 생성
 Future<void> createHistoryEventRealm() async {
   try {
-    print("🏗️ HistoryEvent Realm 데이터베이스 생성 시작...");
+    print("🏗️ HistoryEvent 데이터베이스 생성: ${RealmConfig.historyDbPath}");
     
-    var config = Configuration.local([HistoryEvent.schema]);
-    var realm = Realm(config);
+    var realm = Realm(RealmConfig.historyConfig);
     
     // JSON에서 데이터 로드
     final events = await loadHistoryEventsFromJson();
@@ -121,7 +155,7 @@ Future<void> createHistoryEventRealm() async {
       }
     });
     
-    print("💾 ${events.length}개의 이벤트를 Realm에 저장 완료");
+    print("💾 ${events.length}개의 이벤트를 ${RealmConfig.historyDbPath}에 저장 완료");
     realm.close();
     
   } catch (e) {
@@ -132,10 +166,9 @@ Future<void> createHistoryEventRealm() async {
 // HistoryEvent Realm 데이터베이스 테스트
 Future<void> testHistoryEventRealm() async {
   try {
-    print("🔍 HistoryEvent Realm 데이터베이스 테스트 시작...");
+    print("🔍 HistoryEvent 데이터베이스 테스트: ${RealmConfig.historyDbPath}");
     
-    var config = Configuration.local([HistoryEvent.schema]);
-    var realm = Realm(config);
+    var realm = Realm(RealmConfig.historyConfig);
     
     // 전체 이벤트 수 확인
     var allEvents = realm.all<HistoryEvent>();
@@ -143,6 +176,7 @@ Future<void> testHistoryEventRealm() async {
     
     if (allEvents.isEmpty) {
       print("❌ 데이터베이스가 비어있습니다. createHistoryEventRealm()을 먼저 실행하세요.");
+      realm.close();
       return;
     }
     
@@ -180,6 +214,62 @@ Future<void> testHistoryEventRealm() async {
   }
 }
 
+// 통합 데이터베이스 생성 (Car + HistoryEvent)
+Future<void> createCombinedRealm() async {
+  try {
+    print("🏗️ 통합 데이터베이스 생성: ${RealmConfig.combinedDbPath}");
+    
+    var realm = Realm(RealmConfig.combinedConfig);
+    
+    // JSON에서 HistoryEvent 데이터 로드
+    final events = await loadHistoryEventsFromJson();
+    
+    // 데이터 저장
+    realm.write(() {
+      // 기존 데이터 삭제
+      realm.deleteAll<HistoryEvent>();
+      realm.deleteAll<Car>();
+      
+      // HistoryEvent 저장
+      for (var event in events) {
+        realm.add(event);
+      }
+      
+      // Car 데이터 저장
+      realm.add(Car("Tesla", "Model Y", kilometers: 5));
+      realm.add(Car("BMW", "X5", kilometers: 15000));
+      realm.add(Car("Toyota", "Prius", kilometers: 8000));
+    });
+    
+    print("💾 통합 데이터베이스 생성 완료: ${events.length}개 이벤트 + 3개 차량");
+    realm.close();
+    
+  } catch (e) {
+    print("❌ 통합 데이터베이스 생성 중 에러: $e");
+  }
+}
+
+// 통합 데이터베이스 테스트
+Future<void> testCombinedRealm() async {
+  try {
+    print("🔍 통합 데이터베이스 테스트: ${RealmConfig.combinedDbPath}");
+    
+    var realm = Realm(RealmConfig.combinedConfig);
+    
+    var events = realm.all<HistoryEvent>();
+    var cars = realm.all<Car>();
+    
+    print("📊 통합 DB 내용:");
+    print("   - 이벤트: ${events.length}개");
+    print("   - 차량: ${cars.length}개");
+    
+    realm.close();
+    
+  } catch (e) {
+    print("❌ 통합 데이터베이스 테스트 중 에러: $e");
+  }
+}
+
 // 통합 테스트 함수
 Future<void> runHistoryEventTests() async {
   print("🚀 HistoryEvent 통합 테스트 시작\n");
@@ -205,22 +295,22 @@ Future<void> runHistoryEventTests() async {
 }
 
 testLoadHistoryEventsFromJson() async {
-      print('\n📚 Step 1: JSON 데이터 로딩 테스트');
+  print('\n📚 Step 1: JSON 데이터 로딩 테스트');
+  print('----------------------------------------');
+  var events = await loadHistoryEventsFromJson();
+  print('✅ Step 1 완료: ${events.length}개 이벤트 로드됨');
+  
+  if (events.isNotEmpty) {
+    print('\n🔍 Step 2: 첫 번째 이벤트 상세 정보');
     print('----------------------------------------');
-    var events = await loadHistoryEventsFromJson();
-    print('✅ Step 1 완료: ${events.length}개 이벤트 로드됨');
-    
-    if (events.isNotEmpty) {
-      print('\n🔍 Step 2: 첫 번째 이벤트 상세 정보');
-      print('----------------------------------------');
-      final firstEvent = events.first;
-      print('ID: ${firstEvent.id}');
-      print('제목: ${firstEvent.title}');
-      print('연도: ${firstEvent.year}');
-      print('간단 설명 길이: ${firstEvent.simple.length} 문자');
-      print('상세 설명 길이: ${firstEvent.detail.length} 문자');
-      print('유튜브 URL: ${firstEvent.youtube_url.isEmpty ? "없음" : firstEvent.youtube_url}');
-    }
+    final firstEvent = events.first;
+    print('ID: ${firstEvent.id}');
+    print('제목: ${firstEvent.title}');
+    print('연도: ${firstEvent.year}');
+    print('간단 설명 길이: ${firstEvent.simple.length} 문자');
+    print('상세 설명 길이: ${firstEvent.detail.length} 문자');
+    print('유튜브 URL: ${firstEvent.youtube_url.isEmpty ? "없음" : firstEvent.youtube_url}');
+  }
 }
 
 main() async {
