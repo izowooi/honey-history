@@ -10,12 +10,13 @@ import 'package:realm/realm.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'car.dart';
+import 'history_event.dart';
 
 
 Future<void> copyRealmFromAssets() async {
   // 앱 문서 디렉토리 가져오기
   final appDocDir = await getApplicationDocumentsDirectory();
-  final realmPath = '${appDocDir.path}/default.realm';
+  final realmPath = '${appDocDir.path}/history_events.realm';
   
   // 이미 복사된 파일이 있는지 확인
   final realmFile = File(realmPath);
@@ -27,7 +28,7 @@ Future<void> copyRealmFromAssets() async {
   
   if (!realmFile.existsSync()) { // || currentVersion < newVersion) {
     // assets에서 파일 읽기
-    final data = await rootBundle.load('assets/default.realm');
+    final data = await rootBundle.load('assets/history_events.realm');
     final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
     
     // 기존 파일이 있다면 삭제
@@ -53,32 +54,32 @@ Future<void> showCar() async {
     
     // 앱 문서 디렉토리 경로 가져오기
     final appDocDir = await getApplicationDocumentsDirectory();
-    final realmPath = '${appDocDir.path}/default.realm';
+    final realmPath = '${appDocDir.path}/history_events.realm';
     
     // Realm 설정 및 열기
     var config = Configuration.local(
-      [Car.schema],
+      [HistoryEvent.schema],
       path: realmPath,
       isReadOnly: false,
     );
     var realm = Realm(config);
     
     // 데이터 읽기
-    var cars = realm.all<Car>();
+    var historyEvents = realm.all<HistoryEvent>();
     
-    if (cars.isNotEmpty) {
-      Car myCar = cars[0];
-      print("My car is ${myCar.make} model ${myCar.model}");
+    if (historyEvents.isNotEmpty) {
+      HistoryEvent historyEvent = historyEvents[0];
+      print("HistoryEvent is ${historyEvent.id} title ${historyEvent.title}");
       
       // Tesla 차량 검색
-      var teslaCars = realm.all<Car>().query("make == 'Tesla'");
-      print("Found ${teslaCars.length} Tesla cars");
+      var event0701 = realm.all<HistoryEvent>().query("id == '07-01'");
+      print("Found ${event0701.length} 0701");
       
-      for (var car in teslaCars) {
-        print("- ${car.make} ${car.model}, ${car.kilometers} km");
+      for (var eventFirst in event0701) {
+        print("- ${eventFirst.id} - ${eventFirst.title} - ${eventFirst.year}");
       }
     } else {
-      print("No cars found in database");
+      print("No event found in database");
     }
     
     // Realm 닫기 (선택사항)
