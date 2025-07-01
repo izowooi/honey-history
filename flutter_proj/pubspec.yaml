@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   intl: ^0.19.0
   flutter_riverpod: ^2.4.9
-  youtube_player_flutter: ^8.1.2
+  youtube_player_flutter: ^9.1.1
   shared_preferences: ^2.5.3
   just_audio: ^0.9.46
   realm: ^20.0.1
@@ -70,6 +70,7 @@ flutter:
     - assets/illustration/
     - assets/audio/
     - assets/default.realm
+    - assets/history_events.realm
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
