@@ -74,8 +74,8 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
         contentDetailed: event.detail.isEmpty 
             ? '[detailed]이 날에 일어난 역사적 사건에 대한 설명입니다. 실제 앱에서는 날짜별로 다른 실제 역사적 사건을 보여줍니다.' 
             : event.detail,
-        imageUrl: 'assets/illustration/default_history.png', // 기본 이미지 사용
-        relatedMovie: _createDefaultMovie(date),
+        imageUrl: 'assets/illustration/${formattedDate.replaceAll('-', '')}.webp',
+        relatedMovie: event.youtube_url.isEmpty ? null : _createMovieFromYoutubeUrl(event.youtube_url),
       );
     } else {
       return _createDefaultEvent(date);
@@ -86,6 +86,47 @@ final historicalEventProvider = FutureProvider.family<HistoricalEvent, DateTime>
     return _createDefaultEvent(date);
   }
 }); 
+
+// YouTube URL에서 videoId 추출하는 함수
+String _extractVideoIdFromUrl(String youtubeUrl) {
+  if (youtubeUrl.isEmpty) {
+    return '';
+  }
+  
+  // https://www.youtube.com/watch?v=_erVOAbz420 형태
+  if (youtubeUrl.contains('youtube.com/watch?v=')) {
+    final uri = Uri.parse(youtubeUrl);
+    final videoId = uri.queryParameters['v'];
+    if (videoId != null && videoId.isNotEmpty) {
+      return videoId;
+    }
+  }
+  
+  // https://youtu.be/_erVOAbz420 형태
+  if (youtubeUrl.contains('youtu.be/')) {
+    final uri = Uri.parse(youtubeUrl);
+    final pathSegments = uri.pathSegments;
+    if (pathSegments.isNotEmpty) {
+      final videoId = pathSegments.first;
+      if (videoId.isNotEmpty) {
+        return videoId;
+      }
+    }
+  }
+  
+  // 지원하지 않는 URL 형태
+  print('Warning: Unsupported YouTube URL format: $youtubeUrl');
+  return '';
+}
+
+// YouTube URL로부터 Movie 객체 생성
+Movie _createMovieFromYoutubeUrl(String youtubeUrl) {
+  final videoId = _extractVideoIdFromUrl(youtubeUrl);
+  
+  return Movie(
+    videoId: videoId.isEmpty ? '' : videoId,
+  );
+}
 
 HistoricalEvent _createDefaultEvent(DateTime date) {
   return HistoricalEvent(
@@ -100,11 +141,6 @@ HistoricalEvent _createDefaultEvent(DateTime date) {
 
 Movie _createDefaultMovie(DateTime date) {
   return Movie(
-    title: '관련 영화 제목',
-    year: '${2000 + date.day}',
-    director: '감독 이름',
-    posterUrl: 'assets/illustration/default_movie_poster.jpg',
-    description: '이 영화는 해당 역사적 사건을 배경으로 한 작품입니다.',
     videoId: 'iLnmTe5Q2Qw',
   );
 } 

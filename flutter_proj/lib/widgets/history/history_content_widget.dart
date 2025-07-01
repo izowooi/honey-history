@@ -84,7 +84,7 @@ class HistoryContentWidget extends ConsumerWidget {
             ),
           ),
         ),
-        if (showMovies) ...[
+        if (showMovies && event.relatedMovie != null && event.relatedMovie!.videoId.isNotEmpty) ...[
           const SizedBox(height: 24),
           MovieSectionWidget(movie: event.relatedMovie),
         ],

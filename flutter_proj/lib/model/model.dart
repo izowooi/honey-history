@@ -28,19 +28,9 @@ class HistoricalEvent {
 }
 
 class Movie {
-  final String title;
-  final String year;
-  final String director;
-  final String posterUrl;
-  final String description;
   final String videoId;
 
   Movie({
-    required this.title,
-    required this.year,
-    required this.director,
-    required this.posterUrl,
-    required this.description,
     required this.videoId,
   });
 }

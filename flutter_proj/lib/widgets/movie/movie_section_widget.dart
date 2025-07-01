@@ -53,7 +53,7 @@ class _MovieSectionWidgetState extends ConsumerState<MovieSectionWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '관련 영화',
+          '관련 미디어',
           style: TextStyle(
             fontSize: 20 * fontSizeScale,
             fontWeight: FontWeight.bold,
@@ -81,30 +81,6 @@ class _MovieSectionWidgetState extends ConsumerState<MovieSectionWidget> {
                         handleColor: Colors.redAccent,
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  widget.movie!.title,
-                  style: TextStyle(
-                    fontSize: 18 * fontSizeScale,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${widget.movie!.year} | ${widget.movie!.director}',
-                  style: TextStyle(
-                    fontSize: 14 * fontSizeScale,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  widget.movie!.description,
-                  style: TextStyle(
-                    fontSize: 16 * fontSizeScale,
-                    height: 1.5,
                   ),
                 ),
               ],
