@@ -11,6 +11,8 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'car.dart';
 import 'history_event.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 
 Future<void> copyRealmFromAssets() async {
@@ -91,6 +93,8 @@ Future<void> showCar() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  
     // Realm DB 읽기 테스트
   await showCar();
   runApp(

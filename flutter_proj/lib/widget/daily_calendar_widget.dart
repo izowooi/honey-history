@@ -7,6 +7,7 @@ import 'package:flutter_proj/providers/settings_provider.dart';
 import 'package:flutter_proj/providers/audio_provider.dart';
 import 'package:flutter_proj/widgets/history/history_content_widget.dart';
 import 'package:flutter_proj/widgets/settings/settings_drawer.dart';
+import 'package:flutter_proj/widgets/remote_config_test_widget.dart';
 
 class DailyCalendarWidget extends ConsumerStatefulWidget {
   const DailyCalendarWidget({super.key});
@@ -116,6 +117,20 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
             error: (_, __) => const Text('오류 발생'),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.cloud_download),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RemoteConfigTestWidget(),
+                ),
+              );
+            },
+            tooltip: 'Remote Config 테스트',
+          ),
+        ],
       ),
       drawer: const SettingsDrawer(),
       body: GestureDetector(
