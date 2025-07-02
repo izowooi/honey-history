@@ -6,6 +6,16 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+// 1. Properties 파일 읽기
+def keystoreProperties = new Properties()
+def keystoreFile = rootProject.file("../../secure/honey-history-keystore.properties")
+if (keystoreFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystoreFile))
+} else {
+    throw new FileNotFoundException("honey-history-keystore.properties 파일을 찾을 수 없습니다.")
+}
+
+
 android {
     namespace = "com.izowooi.honey_history"
     compileSdk = flutter.compileSdkVersion
@@ -36,11 +46,18 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 }
