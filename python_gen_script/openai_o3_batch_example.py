@@ -64,8 +64,7 @@ class OpenAIO3BatchService:
                     "model": self.model,
                     "messages": messages,
                     "max_completion_tokens": 4000,  # o3 모델은 max_completion_tokens 필수
-                    "reasoning_effort": task.get("effort", "medium"),  # low, medium, high
-                    "temperature": 0.7
+                    "reasoning_effort": task.get("effort", "medium")  # low, medium, high
                 }
             }
             batch_requests.append(request)
@@ -90,7 +89,7 @@ class OpenAIO3BatchService:
             "coding": "당신은 프로그래밍 전문가입니다. 효율적이고 가독성 좋은 코드를 작성하고 자세히 설명하세요.",
             "science": "당신은 과학 연구자입니다. 과학적 원리를 바탕으로 정확하고 상세한 분석을 제공하세요.",
             "reasoning": "당신은 논리적 사고 전문가입니다. 체계적으로 분석하고 근거를 바탕으로 결론을 도출하세요.",
-            "history": "당신은 역사 전문가입니다. 정확한 사실을 바탕으로 흥미롭게 설명하세요.",
+            "history": "당신은 복잡한 역사를 흥미진진한 이야기로 풀어내는 역사 해설가입니다. 이모지를 섞어서 흥미진진하게 서술하세요.",
             "general": "당신은 도움이 되는 AI 어시스턴트입니다. 정확하고 유용한 정보를 제공하세요."
         }
         return prompts.get(task_type, prompts["general"])
@@ -258,10 +257,10 @@ def create_sample_tasks() -> List[Dict[str, str]]:
     """샘플 작업들 생성 (다양한 영역)"""
     tasks = [
         {
-            "id": "math-1",
-            "type": "math",
+            "id": "history-1",
+            "type": "history",
             "effort": "high",
-            "prompt": "다음 방정식을 풀어주세요: x³ - 6x² + 11x - 6 = 0. 모든 구해주세요."
+            "prompt": "율리우스 카이사르에 간단히 500자 내외로 알려줘."
         }
     ]
     return tasks
