@@ -140,7 +140,7 @@ def main():
     """메인 함수"""
     parser = argparse.ArgumentParser(description='배치 상태 조회 및 결과 다운로드')
     parser.add_argument('--batch-id'
-                        , default="batch_685bf51099f881909f38b5dc0b5e9c99"
+                        , default="batch_68768501abe48190967ddd4e10866ce6"
                         , help='배치 작업 ID')
 
     args = parser.parse_args()

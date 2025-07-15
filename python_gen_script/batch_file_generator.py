@@ -60,8 +60,8 @@ def create_batch_input_file(service: OpenAIBatchService, test_data: dict, file_p
                         {"role": "developer", "content": system_content},
                         {"role": "user", "content": user_content}
                     ],
-                    "max_completion_tokens": 12000,  # o3 모델은 max_completion_tokens 필수
-                    "reasoning_effort": "high"  # low, medium, high
+                    "max_completion_tokens": 20000,  # o3 모델은 max_completion_tokens 필수
+                    "reasoning_effort": "medium"  # low, medium, high
                 }
             }
         else:
@@ -155,7 +155,8 @@ def main():
     parser = argparse.ArgumentParser(description='배치 입력 파일 생성')
     parser.add_argument('--model', 
                        #default="gpt-4.1-2025-04-14",
-                        default="o4-mini",
+                        default="o4-mini-2025-04-16",
+                        #default="gpt-4.1-mini-2025-04-14",
                        help='사용할 모델명 (기본값: gpt-4.1-2025-04-14)')
     parser.add_argument('--data-file',
                        default="historical_events.json",
@@ -163,7 +164,7 @@ def main():
 
     args = parser.parse_args()
 
-    reasoning_model_list = ['o4-mini', 'o3', 'o3-pro', 'o3-mini', 'o1', 'o1-pro']
+    reasoning_model_list = ['o4-mini-2025-04-16', 'o3', 'o3-pro', 'o3-mini', 'o1', 'o1-pro']
 
     is_reasoning_model = args.model in reasoning_model_list
     
