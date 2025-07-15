@@ -32,14 +32,15 @@ def run_batch_job(file_path: str = "batchinput.jsonl", description: str = "Histo
         return None
     
     # 모델 선택
-    gpt_4_1_nano = "gpt-4.1-nano-2025-04-14"  # 가장 빠른 모델
+    gpt_4_1_nano = "gpt-4.1-nano-2025-04-14"  # 가장 빠른 추론 모델 (input 0.4, output 1.6)
     o4_mini = "o4-mini-2025-04-16"  # 비용 효율적 추론 모델 (input 1.1, output 4.4)
     model_4_1_mini = "gpt-4.1-mini-2025-04-14"  # 비용 효율적 균형 모델 (input 0.4, output 1.6)
     model_4_1 = "gpt-4.1-2025-04-14"  # 플래그십 균형 모델 (input 2, output 8)
     o3 = "o3-2025-04-16"  # 가장 강력한 추론 모델 (input 2, output 8)
-    
+    o3_mini = "o3-mini-2025-01-31"  # 비용 효율적 추론 모델 (input 1.1, output 4.4)
+
     # 서비스 초기화 (기본값: gpt-4.1-mini)
-    service = OpenAIBatchService(api_key, model=model_4_1)
+    service = OpenAIBatchService(api_key, model=o4_mini)
     
     # 파일 존재 확인
     if not os.path.exists(file_path):

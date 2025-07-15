@@ -93,3 +93,7 @@ python3 batch_status_checker.py --batch-id batch_6859dd34096081909d12971f73566ba
 
 deactivate
 ```
+
+# OpenAI 몰랐던점
+- 1년이 지나면 credit 이 만료된다.
+- 추론 모델을 사용하면 4000 토큰도 금방쓴다. 추론과정에서 금방 소진된다.
