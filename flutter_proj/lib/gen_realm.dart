@@ -67,7 +67,7 @@ Future<List<HistoryEvent>> loadHistoryEventsFromJson() async {
     print("🔍 현재 작업 디렉토리: ${Directory.current.path}");
     
     // JSON 파일 경로 확인
-    final file = File('lib/historical_events_3q.json');
+    final file = File('lib/historical_events.json');
     print("📄 파일 경로: ${file.absolute.path}");
     print("✅ 파일 존재 여부: ${await file.exists()}");
     
@@ -180,6 +180,7 @@ Future<void> testHistoryEventRealm() async {
       return;
     }
     
+  
     // 첫 번째 이벤트 상세 정보
     final firstEvent = allEvents.first;
     print("\n🥇 첫 번째 이벤트:");
@@ -189,7 +190,7 @@ Future<void> testHistoryEventRealm() async {
     print("   간단 설명: ${firstEvent.simple.length > 100 ? firstEvent.simple.substring(0, 100) + '...' : firstEvent.simple}");
     
     // 특정 연도 검색 테스트
-    var year1863Events = realm.all<HistoryEvent>().query("year == '1863'");
+    var year1863Events = realm.all<HistoryEvent>().query("year == '1941'");
     print("\n🔍 1863년 이벤트 검색 결과: ${year1863Events.length}개");
     for (var event in year1863Events) {
       print("   - ${event.title}");
@@ -200,6 +201,12 @@ Future<void> testHistoryEventRealm() async {
     print("\n⚔️ '전투'가 포함된 이벤트: ${battleEvents.length}개");
     for (var event in battleEvents) {
       print("   - ${event.title} (${event.year})");
+    }
+
+    var dayEvents = realm.all<HistoryEvent>().query("title CONTAINS '하노버'");
+    print("\n날짜 이벤트: ${dayEvents.length}개");
+    for (var event in dayEvents) {
+      print("   - ${event.title} (${event.year}) (${event.simple})");
     }
     
     // 유튜브 URL이 있는 이벤트 수
@@ -323,7 +330,7 @@ main() async {
     //testDefaultRealm();
 
     //await testLoadHistoryEventsFromJson();
-    //await createHistoryEventRealm();
+    await createHistoryEventRealm();
     await testHistoryEventRealm();
 
     print('\n============================================');
