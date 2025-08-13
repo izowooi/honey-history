@@ -41,6 +41,8 @@ dependencies:
   just_audio: ^0.9.46
   realm: ^20.0.1
   firebase_remote_config: ^5.4.6
+  http: ^1.5.0
+  path_provider: ^2.1.5
   
 dev_dependencies:
   flutter_test:
@@ -69,7 +71,6 @@ flutter:
     - assets/data/
     - assets/data/movies.json
     - assets/illustration/
-    - assets/audio/
     - assets/default.realm
     - assets/history_events.realm
 

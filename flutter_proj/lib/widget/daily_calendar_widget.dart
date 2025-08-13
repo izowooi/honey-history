@@ -26,7 +26,14 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
   }
 
   void _toggleAudio(WidgetRef ref) {
-    toggleAudio(ref);  // audio_provider.dart의 toggleAudio 함수 호출
+    final date = ref.read(selectedDateProvider);
+    toggleAudio(ref, date).then((ok) {
+      if (!ok && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('오디오를 재생할 수 없습니다. 잠시 후 다시 시도해주세요.')),
+        );
+      }
+    });
   }
 
   Widget _buildAudioControl(WidgetRef ref) {
@@ -34,33 +41,20 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
     final isPlaying = ref.watch(isPlayingProvider);
     final hasAudioFile = ref.watch(hasAudioFileProvider);
 
-    if (!hasAudioFile) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        child: const Text(
-          '오디오 없음',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
-          ),
-        ),
-      );
-    }
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            duration,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
+          if (hasAudioFile)
+            Text(
+              duration,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
             ),
-          ),
           const SizedBox(width: 8),
           IconButton(
             icon: Icon(

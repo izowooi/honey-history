@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path/path.dart' as path;
-import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:io';
 
 final audioPlayerProvider = Provider<AudioPlayer>((ref) {
   final player = AudioPlayer();
@@ -31,33 +33,54 @@ final audioDurationProvider = StateProvider<String>((ref) => "00:00");
 final isPlayingProvider = StateProvider<bool>((ref) => false);
 final hasAudioFileProvider = StateProvider<bool>((ref) => false);
 
+Uri _buildAudioUri(DateTime date) {
+  final month = date.month.toString().padLeft(2, '0');
+  final day = date.day.toString().padLeft(2, '0');
+  final url = 'https://honeyhistory.zowoo.uk/audio/$month$day.mp3';
+  return Uri.parse(url);
+}
+
+Future<File> _resolveCacheFile(DateTime date) async {
+  final cacheDir = await getTemporaryDirectory();
+  final month = date.month.toString().padLeft(2, '0');
+  final day = date.day.toString().padLeft(2, '0');
+  final fileName = 'audio_${month}${day}.mp3';
+  return File(path.join(cacheDir.path, fileName));
+}
+
 Future<void> loadAudio(WidgetRef ref, DateTime date) async {
   print('Loading audio for date: ${date.toString()}');
   final player = ref.read(audioPlayerProvider);
-  final month = date.month.toString().padLeft(2, '0');
-  final day = date.day.toString().padLeft(2, '0');
-  final audioPath = 'assets/audio/$month$day.mp3';
-  print('Audio path: $audioPath');
+  final uri = _buildAudioUri(date);
+  final cacheFile = await _resolveCacheFile(date);
 
   try {
-    // 오디오 파일 존재 여부 확인
-    final hasFile = await rootBundle.load(audioPath).then((_) => true).catchError((_) => false);
-    print('Audio file exists: $hasFile');
-    ref.read(hasAudioFileProvider.notifier).state = hasFile;
-
-    if (hasFile) {
-      print('Setting audio asset...');
-      await player.setAsset(audioPath);
-      print('Audio asset set successfully');
-      
-      final duration = await player.duration;
-      print('Audio duration: $duration');
-      if (duration != null) {
-        final minutes = duration.inMinutes;
-        final seconds = duration.inSeconds % 60;
-        ref.read(audioDurationProvider.notifier).state = 
-            "$minutes:${seconds.toString().padLeft(2, '0')}";
+    if (await cacheFile.exists()) {
+      print('Using cached audio: ${cacheFile.path}');
+      await player.setFilePath(cacheFile.path);
+      ref.read(hasAudioFileProvider.notifier).state = true;
+    } else {
+      print('Downloading audio from: $uri');
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        await cacheFile.writeAsBytes(response.bodyBytes, flush: true);
+        print('Saved to cache: ${cacheFile.path}');
+        await player.setFilePath(cacheFile.path);
+        ref.read(hasAudioFileProvider.notifier).state = true;
+      } else {
+        print('Audio not found: HTTP ${response.statusCode}');
+        ref.read(hasAudioFileProvider.notifier).state = false;
+        return;
       }
+    }
+
+    final duration = await player.duration;
+    print('Audio duration: $duration');
+    if (duration != null) {
+      final minutes = duration.inMinutes;
+      final seconds = duration.inSeconds % 60;
+      ref.read(audioDurationProvider.notifier).state =
+          "$minutes:${seconds.toString().padLeft(2, '0')}";
     }
   } catch (e) {
     print('Error loading audio: $e');
@@ -65,22 +88,28 @@ Future<void> loadAudio(WidgetRef ref, DateTime date) async {
   }
 }
 
-Future<void> toggleAudio(WidgetRef ref) async {
+Future<bool> toggleAudio(WidgetRef ref, DateTime date) async {
   print('Toggle audio called');
   final player = ref.read(audioPlayerProvider);
   var isPlaying = ref.read(isPlayingProvider);
 
-  print('Current isPlaying state: $isPlaying');
   if (isPlaying) {
-    print('Pausing audio...');
     await player.pause();
-    print('Audio paused');
-  } else {
-    print('Playing audio...');
-    await player.play();
-    print('Play command executed');
+    ref.read(isPlayingProvider.notifier).state = false;
+    return true;
   }
-  isPlaying = !isPlaying;
-  print('Updating isPlaying state to: $isPlaying');
-  ref.read(isPlayingProvider.notifier).state = isPlaying;
-} 
+
+  // Not playing → ensure source prepared
+  if (!ref.read(hasAudioFileProvider)) {
+    await loadAudio(ref, date);
+  }
+
+  if (!ref.read(hasAudioFileProvider)) {
+    // prepare failed
+    return false;
+  }
+
+  await player.play();
+  ref.read(isPlayingProvider.notifier).state = true;
+  return true;
+}
