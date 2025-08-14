@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_proj/providers/settings_provider.dart';
+import 'package:flutter_proj/providers/build_info_provider.dart';
 
 class SettingsDrawer extends ConsumerWidget {
   const SettingsDrawer({super.key});
@@ -29,27 +30,69 @@ class SettingsDrawer extends ConsumerWidget {
               ),
             ),
           ),
-          CheckboxListTile(
-            title: const Text('알림'),
-            subtitle: const Text('매일 역사적 사건 알림 받기'),
-            value: notificationEnabled,
-            onChanged: (bool? value) {
-              if (value != null) {
-                ref.read(notificationEnabledProvider.notifier).setValue(value);
-              }
+          Consumer(
+            builder: (context, ref, _) {
+              final isReviewBuild = ref.watch(isReviewBuildProvider);
+              return isReviewBuild.when(
+                data: (flag) {
+                  if (flag) return const SizedBox.shrink();
+                  return CheckboxListTile(
+                    title: const Text('알림'),
+                    subtitle: const Text('매일 역사적 사건 알림 받기'),
+                    value: notificationEnabled,
+                    onChanged: (bool? value) {
+                      if (value != null) {
+                        ref.read(notificationEnabledProvider.notifier).setValue(value);
+                      }
+                    },
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
             },
           ),
-          const Divider(),
-          CheckboxListTile(
-            title: const Text('관련 영화 표시'),
-            value: showMovies,
-            onChanged: (bool? value) {
-              if (value != null) {
-                ref.read(showMoviesProvider.notifier).setValue(value);
-              }
+          Consumer(
+            builder: (context, ref, _) {
+              final isReviewBuild = ref.watch(isReviewBuildProvider);
+              return isReviewBuild.when(
+                data: (flag) => flag ? const SizedBox.shrink() : const Divider(),
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
             },
           ),
-          const Divider(),
+          Consumer(
+            builder: (context, ref, _) {
+              final isReviewBuild = ref.watch(isReviewBuildProvider);
+              return isReviewBuild.when(
+                data: (flag) {
+                  if (flag) return const SizedBox.shrink();
+                  return CheckboxListTile(
+                    title: const Text('관련 영화 표시'),
+                    value: showMovies,
+                    onChanged: (bool? value) {
+                      if (value != null) {
+                        ref.read(showMoviesProvider.notifier).setValue(value);
+                      }
+                    },
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final isReviewBuild = ref.watch(isReviewBuildProvider);
+              return isReviewBuild.when(
+                data: (flag) => flag ? const SizedBox.shrink() : const Divider(),
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+          ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Text(
@@ -123,25 +166,61 @@ class SettingsDrawer extends ConsumerWidget {
               }
             },
           ),
-          const Divider(),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Text(
-              '개발자 옵션',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          Consumer(
+            builder: (context, ref, _) {
+              final isReviewBuild = ref.watch(isReviewBuildProvider);
+              return isReviewBuild.when(
+                data: (flag) {
+                  if (flag) return const SizedBox.shrink();
+                  return const Divider();
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
+            },
           ),
-          CheckboxListTile(
-            title: const Text('디버그 모드'),
-            subtitle: const Text('개발자용 디버그 정보 표시'),
-            value: isDebug,
-            onChanged: (bool? value) {
-              if (value != null) {
-                ref.read(isDebugProvider.notifier).setValue(value);
-              }
+          Consumer(
+            builder: (context, ref, _) {
+              final isReviewBuild = ref.watch(isReviewBuildProvider);
+              return isReviewBuild.when(
+                data: (flag) {
+                  if (flag) return const SizedBox.shrink();
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: Text(
+                      '개발자 옵션',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final isReviewBuild = ref.watch(isReviewBuildProvider);
+              return isReviewBuild.when(
+                data: (flag) {
+                  if (flag) return const SizedBox.shrink();
+                  return CheckboxListTile(
+                    title: const Text('디버그 모드'),
+                    subtitle: const Text('개발자용 디버그 정보 표시'),
+                    value: isDebug,
+                    onChanged: (bool? value) {
+                      if (value != null) {
+                        ref.read(isDebugProvider.notifier).setValue(value);
+                      }
+                    },
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
             },
           ),
         ],

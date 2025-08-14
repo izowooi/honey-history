@@ -8,6 +8,7 @@ import 'package:flutter_proj/providers/audio_provider.dart';
 import 'package:flutter_proj/widgets/history/history_content_widget.dart';
 import 'package:flutter_proj/widgets/settings/settings_drawer.dart';
 import 'package:flutter_proj/widgets/remote_config_test_widget.dart';
+import 'package:flutter_proj/providers/build_info_provider.dart';
 
 class DailyCalendarWidget extends ConsumerStatefulWidget {
   const DailyCalendarWidget({super.key});
@@ -112,17 +113,29 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.cloud_download),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const RemoteConfigTestWidget(),
-                ),
+          Consumer(
+            builder: (context, ref, _) {
+              final isReviewBuild = ref.watch(isReviewBuildProvider);
+              return isReviewBuild.when(
+                data: (flag) {
+                  if (flag) return const SizedBox.shrink();
+                  return IconButton(
+                    icon: const Icon(Icons.cloud_download),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RemoteConfigTestWidget(),
+                        ),
+                      );
+                    },
+                    tooltip: 'Remote Config 테스트',
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
               );
             },
-            tooltip: 'Remote Config 테스트',
           ),
         ],
       ),

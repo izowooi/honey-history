@@ -7,7 +7,7 @@ final remoteConfigProvider = Provider<FirebaseRemoteConfig>((ref) {
   
   // 기본값 설정
   remoteConfig.setDefaults({
-    'review_version': '0.0.0', // 기본값
+    'review_version': '0', // Android versionCode (정수) 기본값
   });
   
   print('Remote Config Provider 초기화됨');
@@ -61,7 +61,7 @@ final remoteConfigValuesProvider = FutureProvider<Map<String, String>>((ref) asy
     print('스택 트레이스: $stackTrace');
     // 에러 시 기본값 반환
     return {
-      'review_version': '0.0.0',
+      'review_version': '0',
       'fetch_time': DateTime.now().toIso8601String(),
       'error': e.toString(),
       'stack_trace': stackTrace.toString(),
@@ -72,7 +72,7 @@ final remoteConfigValuesProvider = FutureProvider<Map<String, String>>((ref) asy
 // 특정 키의 값만 가져오는 provider
 final reviewVersionProvider = FutureProvider<String>((ref) async {
   final values = await ref.watch(remoteConfigValuesProvider.future);
-  final version = values['review_version'] ?? '0.0.0';
+  final version = values['review_version'] ?? '1';
   print('reviewVersionProvider에서 반환하는 값: "$version"');
   return version;
 });
