@@ -153,7 +153,41 @@ flutter pub run realm generate
 
 ## 🚀 빌드/배포(간단 메모)
 - Android 서명: 아래 키스토어 명령 참고 후 `android/app/build.gradle`에 서명 설정.
+- Android AAB 빌드:
+```bash
+flutter build appbundle --release
+```
+  - 결과 파일: `build/app/outputs/bundle/release/app-release.aab`
 - iOS: Xcode에서 번들 ID/서명 설정 후 Archive.
+
+### 🧰 빌드/실행 CLI 치트시트
+- `flutter build appbundle --release`
+  - Android용 AAB 생성 명령. 구글 플레이 업로드 시 사용.
+
+- iOS CocoaPods 재설치(Pods 오류·iOS 타깃 변경 후 권장)
+```bash
+cd ios
+rm -rf Pods Podfile.lock
+pod repo update
+pod install
+cd ..
+flutter clean
+flutter pub get
+```
+  - Pod 캐시 불일치, iOS 배포 타깃/의존성 변경 이후 빌드 이슈 해결에 사용.
+
+- 특정 디바이스로 실행(디버그/프로파일)
+```bash
+flutter run -d <device_id>
+```
+  - 예: `flutter run -d 00008110-000E31D41412801E`
+  - iOS 14+에서 USB 분리 상태로 홈스크린에서 직접 실행하려면 Release/Profile 빌드가 필요합니다.
+
+- iOS Release 빌드(아카이브/테스트플라이트용)
+```bash
+flutter build ios --release
+```
+  - Xcode Organizer에서 배포 또는 TestFlight 업로드에 사용.
 
 즐거운 역사 여행 되세요! 🗺️📜✨
 
