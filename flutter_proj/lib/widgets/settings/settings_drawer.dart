@@ -5,6 +5,8 @@ import 'package:flutter_proj/providers/build_info_provider.dart';
 
 class SettingsDrawer extends ConsumerWidget {
   const SettingsDrawer({super.key});
+  static const isNotificationEnabled = false;
+  static const isDeveloperMode = false;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,7 +37,7 @@ class SettingsDrawer extends ConsumerWidget {
               final isReviewBuild = ref.watch(isReviewBuildProvider);
               return isReviewBuild.when(
                 data: (flag) {
-                  if (flag) return const SizedBox.shrink();
+                  if (flag || isNotificationEnabled == false) return const SizedBox.shrink();
                   return CheckboxListTile(
                     title: const Text('알림'),
                     subtitle: const Text('매일 역사적 사건 알림 받기'),
@@ -56,7 +58,7 @@ class SettingsDrawer extends ConsumerWidget {
             builder: (context, ref, _) {
               final isReviewBuild = ref.watch(isReviewBuildProvider);
               return isReviewBuild.when(
-                data: (flag) => flag ? const SizedBox.shrink() : const Divider(),
+                data: (flag) => flag || isNotificationEnabled == false ? const SizedBox.shrink() : const Divider(),
                 loading: () => const SizedBox.shrink(),
                 error: (_, __) => const SizedBox.shrink(),
               );
@@ -184,7 +186,7 @@ class SettingsDrawer extends ConsumerWidget {
               final isReviewBuild = ref.watch(isReviewBuildProvider);
               return isReviewBuild.when(
                 data: (flag) {
-                  if (flag) return const SizedBox.shrink();
+                  if (flag || isDeveloperMode == false) return const SizedBox.shrink();
                   return const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     child: Text(
@@ -206,7 +208,7 @@ class SettingsDrawer extends ConsumerWidget {
               final isReviewBuild = ref.watch(isReviewBuildProvider);
               return isReviewBuild.when(
                 data: (flag) {
-                  if (flag) return const SizedBox.shrink();
+                  if (flag || isDeveloperMode == false) return const SizedBox.shrink();
                   return CheckboxListTile(
                     title: const Text('디버그 모드'),
                     subtitle: const Text('개발자용 디버그 정보 표시'),
