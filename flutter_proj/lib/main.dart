@@ -15,7 +15,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 
-Future<void> copyRealmFromAssets() async {
+Future<void> copyRealmFromAssets({bool forceOverwrite = false}) async {
   // 앱 문서 디렉토리 가져오기
   final appDocDir = await getApplicationDocumentsDirectory();
   final realmPath = '${appDocDir.path}/history_events.realm';
@@ -28,12 +28,12 @@ Future<void> copyRealmFromAssets() async {
   // final currentVersion = prefs.getInt('db_version') ?? 0;
   // const newVersion = 1; // 앱 업데이트마다 증가
   
-  if (!realmFile.existsSync()) { // || currentVersion < newVersion) {
+  if (forceOverwrite || !realmFile.existsSync()) { // || currentVersion < newVersion) {
     // assets에서 파일 읽기
     final data = await rootBundle.load('assets/history_events.realm');
     final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
     
-    // 기존 파일이 있다면 삭제
+    // 기존 파일이 있고 강제 덮어쓰기면 삭제
     if (realmFile.existsSync()) {
       await realmFile.delete();
     }
@@ -49,54 +49,55 @@ Future<void> copyRealmFromAssets() async {
   }
 }
 
-Future<void> showCar() async {
+
+// Realm DB 전체 검증 로직
+Future<void> validateRealmDb({int previewLength = 20}) async {
   try {
-    // assets에서 Realm DB 복사
-    await copyRealmFromAssets();
-    
-    // 앱 문서 디렉토리 경로 가져오기
     final appDocDir = await getApplicationDocumentsDirectory();
     final realmPath = '${appDocDir.path}/history_events.realm';
-    
-    // Realm 설정 및 열기
-    var config = Configuration.local(
-      [HistoryEvent.schema],
-      path: realmPath,
-      isReadOnly: false,
+    final realm = Realm(
+      Configuration.local(
+        [HistoryEvent.schema],
+        path: realmPath,
+        isReadOnly: true,
+      ),
     );
-    var realm = Realm(config);
-    
-    // 데이터 읽기
-    var historyEvents = realm.all<HistoryEvent>();
-    
-    if (historyEvents.isNotEmpty) {
-      HistoryEvent historyEvent = historyEvents[0];
-      print("HistoryEvent is ${historyEvent.id} title ${historyEvent.title}");
-      
-      // Tesla 차량 검색
-      var event0701 = realm.all<HistoryEvent>().query("id == '07-01'");
-      print("Found ${event0701.length} 0701");
-      
-      for (var eventFirst in event0701) {
-        print("- ${eventFirst.id} - ${eventFirst.title} - ${eventFirst.year}");
-      }
-    } else {
-      print("No event found in database");
+
+    final events = realm.all<HistoryEvent>();
+    print('📊 Realm validation: total events = ${events.length}');
+
+    String _truncate(String value) {
+      if (value.isEmpty) return '';
+      return value.length <= previewLength ? value : value.substring(0, previewLength);
     }
-    
-    // Realm 닫기 (선택사항)
+
+    for (final e in events) {
+      final simple = _truncate(e.simple);
+      final detail = _truncate(e.detail);
+      final youtube = _truncate(e.youtube_url);
+      print('- ${e.id} | ${e.title} | ${e.year} | simple:"$simple" | detail:"$detail" | youtube:"$youtube"');
+    }
+
     realm.close();
-  } catch (e) {
-    print("Error reading Realm DB: $e");
+    print('✅ Realm validation completed.');
+  } catch (e, stack) {
+    print('❌ Realm validation error: $e');
+    print(stack);
   }
 }
+
+// 시작 시 검증 실행 여부 토글
+const bool kRunRealmValidationOnStartup = true;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  
-    // Realm DB 읽기 테스트
-  await showCar();
+  await copyRealmFromAssets();
+
+  // 시작 시 검증을 원할 때만 토글
+  if (kRunRealmValidationOnStartup) {
+    await validateRealmDb(previewLength: 20);
+  }
   runApp(
     const ProviderScope(
       child: MyApp(),
