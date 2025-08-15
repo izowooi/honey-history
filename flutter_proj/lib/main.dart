@@ -87,7 +87,7 @@ Future<void> validateRealmDb({int previewLength = 20}) async {
 }
 
 // 시작 시 검증 실행 여부 토글
-const bool kRunRealmValidationOnStartup = true;
+const bool kRunRealmValidationOnStartup = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
