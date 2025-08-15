@@ -179,42 +179,22 @@ Future<void> testHistoryEventRealm() async {
       realm.close();
       return;
     }
-    
-  
-    // 첫 번째 이벤트 상세 정보
-    final firstEvent = allEvents.first;
-    print("\n🥇 첫 번째 이벤트:");
-    print("   ID: ${firstEvent.id}");
-    print("   제목: ${firstEvent.title}");
-    print("   연도: ${firstEvent.year}");
-    print("   간단 설명: ${firstEvent.simple.length > 100 ? firstEvent.simple.substring(0, 100) + '...' : firstEvent.simple}");
-    
-    // 특정 연도 검색 테스트
-    var year1863Events = realm.all<HistoryEvent>().query("year == '1941'");
-    print("\n🔍 1863년 이벤트 검색 결과: ${year1863Events.length}개");
-    for (var event in year1863Events) {
-      print("   - ${event.title}");
-    }
-    
-    // 제목에 '전투' 포함된 이벤트 검색
-    var battleEvents = realm.all<HistoryEvent>().query("title CONTAINS '전투'");
-    print("\n⚔️ '전투'가 포함된 이벤트: ${battleEvents.length}개");
-    for (var event in battleEvents) {
-      print("   - ${event.title} (${event.year})");
+
+    // 전체 데이터 검증: 모든 레코드 출력 (simple/detail은 20자 제한)
+    String truncate20(String text) {
+      if (text.isEmpty) return '';
+      return text.length <= 20 ? text : text.substring(0, 20);
     }
 
-    var dayEvents = realm.all<HistoryEvent>().query("title CONTAINS '하노버'");
-    print("\n날짜 이벤트: ${dayEvents.length}개");
-    for (var event in dayEvents) {
-      print("   - ${event.title} (${event.year}) (${event.simple})");
+    print("\n🧾 전체 레코드 출력 시작");
+    for (final e in allEvents) {
+      final simpleHead = truncate20(e.simple);
+      final detailHead = truncate20(e.detail);
+      print("- ${e.id} | ${e.title} | ${e.year} | simple:\"$simpleHead\" | detail:\"$detailHead\" | youtube:${e.youtube_url}");
     }
-    
-    // 유튜브 URL이 있는 이벤트 수
-    var eventsWithYoutube = realm.all<HistoryEvent>().query("youtube_url != ''");
-    print("\n🎬 유튜브 URL이 있는 이벤트: ${eventsWithYoutube.length}개");
-    
+
     realm.close();
-    print("\n✅ HistoryEvent Realm 테스트 완료");
+    print("\n✅ 전체 레코드 출력 완료 (총 ${allEvents.length}개)");
     
   } catch (e) {
     print("❌ HistoryEvent Realm 테스트 중 에러: $e");
