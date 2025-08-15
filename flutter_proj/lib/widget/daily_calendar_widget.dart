@@ -112,32 +112,32 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
             error: (_, __) => const Text('오류 발생'),
           ),
         ),
-        actions: [
-          Consumer(
-            builder: (context, ref, _) {
-              final isReviewBuild = ref.watch(isReviewBuildProvider);
-              return isReviewBuild.when(
-                data: (flag) {
-                  if (flag) return const SizedBox.shrink();
-                  return IconButton(
-                    icon: const Icon(Icons.cloud_download),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const RemoteConfigTestWidget(),
-                        ),
-                      );
-                    },
-                    tooltip: 'Remote Config 테스트',
-                  );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              );
-            },
-          ),
-        ],
+        // actions: [
+        //   Consumer(
+        //     builder: (context, ref, _) {
+        //       final isReviewBuild = ref.watch(isReviewBuildProvider);
+        //       return isReviewBuild.when(
+        //         data: (flag) {
+        //           if (flag) return const SizedBox.shrink();
+        //           return IconButton(
+        //             icon: const Icon(Icons.cloud_download),
+        //             onPressed: () {
+        //               Navigator.push(
+        //                 context,
+        //                 MaterialPageRoute(
+        //                   builder: (context) => const RemoteConfigTestWidget(),
+        //                 ),
+        //               );
+        //             },
+        //             tooltip: 'Remote Config 테스트',
+        //           );
+        //         },
+        //         loading: () => const SizedBox.shrink(),
+        //         error: (_, __) => const SizedBox.shrink(),
+        //       );
+        //     },
+        //   ),
+        // ],
       ),
       drawer: const SettingsDrawer(),
       body: GestureDetector(
