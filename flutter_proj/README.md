@@ -3,60 +3,24 @@
 ## ⚙️ 빠른 시작(개발용)
 - **의존성 설치**: `flutter pub get`
 - **런**: `flutter run`
-- **앱 동작 핵심**: 첫 실행 시 에셋(`assets/history_events.realm`)의 Realm DB를 앱 문서 폴더로 복사해서 읽습니다. UI는 `Riverpod` + `Realm` 조합으로 날짜별 사건을 표시합니다.
+- **앱 동작 핵심**: Drift(SQLite) DB를 사용합니다. 첫 실행 시 `lib/historical_events.json`을 읽어 로컬 DB를 시드하고, UI는 `Riverpod` + `Drift` 조합으로 날짜별 사건을 표시합니다.
 
 ---
 
-## 💾 Realm DB 만들기/갱신하기(가장 중요)
-앱은 기본적으로 `assets/history_events.realm`를 복사해 사용합니다. 콘텐츠를 바꾸거나 DB를 새로 만들고 싶다면 아래 절차를 따르세요.
+## 💾 Drift 초기 시드(가장 중요)
+앱은 기본적으로 `lib/historical_events.json`을 읽어 SQLite에 시드합니다. 콘텐츠를 바꾸거나 데이터를 갱신하고 싶다면 JSON을 수정하세요.
 
 ### 1) 입력 JSON 준비
-- 기본 예시는 `assets/data/historical_events.json` 또는 `assets/data/historical_events_2q.json` 입니다. 원하는 소스를 하나 정해 사용하세요.
+- 기본 예시는 `lib/historical_events.json` 입니다. 또는 `assets/data/historical_events.json`로 위치를 옮기고 코드에서 경로를 조정할 수 있습니다.
 
-### 2) 생성 스크립트 설정 확인
-- 스크립트 위치: `lib/gen_realm.dart`
-- 현재 JSON 경로는 다음과 같이 하드코딩되어 있습니다:
-```69:75:/Users/izowooi/git/honey-history/flutter_proj/lib/gen_realm.dart
-    // JSON 파일 경로 확인
-    final file = File('lib/historical_events_3q.json');
-```
-- 위 경로가 없다면, 사용하려는 파일로 바꿔주세요. 예)
-  - `final file = File('assets/data/historical_events.json');`
+### 2) DB 자동 시드
+- `lib/db/app_database.dart`에서 앱 최초 생성 시 JSON을 읽어 테이블(`HistoryEvents`)에 삽입합니다.
 
-### 3) 실제로 DB 파일 생성 실행
-- 스크립트의 `main()`이 테스트만 수행하도록 되어 있을 수 있습니다. 생성 함수를 호출하도록 잠시 바꿔 실행하세요.
-```316:333:/Users/izowooi/git/honey-history/flutter_proj/lib/gen_realm.dart
-main() async {
-  print('🚀 gen_realm.dart 실행 시작');
-  // ...
-  try {
-    // 생성 실행 (필요 시 이 줄을 사용)
-    // await createHistoryEventRealm();
-
-    // 통합 테스트 실행(생성 포함):
-    // await runHistoryEventTests();
-
-    // 현재는 읽기 테스트만 호출되어 있을 수 있습니다.
-    // await testHistoryEventRealm();
-  } catch (e, stackTrace) {
-    // ...
-  }
-}
-```
-- 권장: 한 번은 `await createHistoryEventRealm();` 또는 `await runHistoryEventTests();`를 호출하게 변경 → 저장 → 아래 명령어 실행:
-```bash
-dart run lib/gen_realm.dart
-```
-- 완료되면 프로젝트 루트에 `history_events.realm`가 생성됩니다.
+### 3) 앱 실행 시 자동 생성
+- 앱이 실행되면 Drift가 자동으로 테이블을 만들고, JSON에서 데이터를 로드합니다.
 
 ▶︎ 중요: 실행 환경/경로 주의
-- 반드시 "로컬 개발 머신"에서 위 명령을 실행하세요. 기기(에뮬레이터/디바이스) 안에서 실행하면 프로젝트 경로가 존재하지 않아 다음과 같은 로그가 발생할 수 있습니다:
-```
-현재 작업 디렉토리: /
-파일 경로: /lib/historical_events.json
-파일 존재 여부: false
-```
-- 위 상황은 디바이스 내부에서 `File('lib/historical_events.json')`가 루트(`/`) 기준의 절대경로로 해석되기 때문입니다. 생성 스크립트는 로컬에서 돌리고, 생성된 `.realm` 파일만 에셋으로 복사하세요.
+- JSON은 `rootBundle.loadString('lib/historical_events.json')`로 로드합니다(앱 번들 기준 경로). 필요 시 `assets/data/historical_events.json`로 옮기고 `pubspec.yaml`의 assets에 등록하세요.
 
 대안(앱 내부에서만 읽어야 하는 경우 - 비권장)
 - JSON을 에셋으로 선언한 뒤, 앱 코드에서 `rootBundle`로 읽어 파싱하세요. 예시:
@@ -72,51 +36,16 @@ Future<List<HistoryEvent>> loadHistoryEventsFromJson() async {
 ```
 - 주의: 이 방식은 Flutter 앱 런타임에서만 동작하며, CLI(`dart run`)에서는 `rootBundle`이 없어 실패합니다.
 
-### 4) 앱에서 사용할 에셋으로 반영
-```bash
-cp history_events.realm assets/history_events.realm
-flutter pub get
-```
-- `pubspec.yaml`에 에셋이 선언되어 있어야 합니다(이미 포함됨):
-```67:75:/Users/izowooi/git/honey-history/flutter_proj/pubspec.yaml
-  assets:
-    - assets/data/
-    - assets/data/movies.json
-    - assets/illustration/
-    - assets/audio/
-    - assets/default.realm
-    - assets/history_events.realm
-```
+### 4) JSON 자산 반영
+- `pubspec.yaml`의 assets 섹션에 `lib/historical_events.json`이 포함되어 있습니다(앱 번들 포함). 수정 후 `flutter pub get`을 실행하세요.
 
 ### 5) 앱이 DB를 어떻게 로드하는지
-- 첫 실행 시 에셋 DB를 앱 문서 폴더로 복사합니다. 관련 코드:
-```15:31:/Users/izowooi/git/honey-history/flutter_proj/lib/providers/historical_event_provider.dart
-// Realm DB 복사 함수
-Future<void> copyRealmFromAssets() async {
-  final appDocDir = await getApplicationDocumentsDirectory();
-  final realmPath = '${appDocDir.path}/history_events.realm';
-  final realmFile = File(realmPath);
-  if (!realmFile.existsSync()) {
-    final data = await rootBundle.load('assets/history_events.realm');
-    // ... 파일 복사
-  }
-}
-```
-- 이후 `Realm`은 읽기 전용으로 열립니다:
-```43:50:/Users/izowooi/git/honey-history/flutter_proj/lib/providers/historical_event_provider.dart
-var config = Configuration.local(
-  [HistoryEvent.schema],
-  path: realmPath,
-  isReadOnly: true,
-);
-return Realm(config);
-```
-- UI는 `id == 'MM-dd'` 형태로 조회합니다. 예: `07-01`
+- `AppDatabase`가 생성될 때 테이블을 만들고 JSON을 시드합니다. UI는 `id == 'MM-dd'` 형태로 조회합니다.
 
 ---
 
-## 🧱 Realm 모델 변경 시(코드 생성)
-모델 파일을 바꾸면(`lib/history_event.dart`, `lib/car.dart`) 생성 파일(`*.realm.dart`)을 다시 만들어야 합니다.
+## 🧱 Drift 테이블 변경 시(코드 생성)
+테이블을 바꾸면(`lib/db/app_database.dart`) 코드 생성이 필요합니다.
 
 1) 모델 수정 예시
 ```1:18:/Users/izowooi/git/honey-history/flutter_proj/lib/history_event.dart
@@ -132,14 +61,13 @@ class _HistoryEvent {
 ```
 2) 코드 생성 실행
 ```bash
-flutter pub run realm generate
+dart run build_runner build --delete-conflicting-outputs
 ```
 3) 모델이 바뀌면 기존 DB와 스키마가 어긋날 수 있으니, 위의 "Realm DB 만들기/갱신하기" 절차로 새 DB를 생성해 갱신하세요.
 
 ---
 
 ## 🧪 개발 팁
-- 콘솔 테스트: `lib/main.dart` 내 `showCar()`는 복사된 DB에서 샘플 쿼리를 수행합니다(초기 실행 로그 확인용).
 - 날짜 포맷은 `MM-dd`로 조회합니다. 예: `07-01`의 삽화는 `assets/illustration/0701.webp`를 사용.
 
 ### 🔊 오디오 재생 정책 변경

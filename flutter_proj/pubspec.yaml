@@ -39,7 +39,10 @@ dependencies:
   youtube_player_flutter: ^9.1.1
   shared_preferences: ^2.5.3
   just_audio: ^0.9.46
-  realm: ^20.0.1
+  drift: ^2.28.1
+  sqlite3_flutter_libs: ^0.5.39
+  path: ^1.9.0
+  firebase_core: ^3.15.0
   firebase_remote_config: ^5.4.6
   http: ^1.5.0
   path_provider: ^2.1.5
@@ -55,6 +58,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  build_runner: ^2.4.12
+  drift_dev: ^2.28.1
+  sqlite3: ^2.9.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -72,8 +78,8 @@ flutter:
     - assets/data/
     - assets/data/movies.json
     - assets/illustration/
-    - assets/default.realm
-    - assets/history_events.realm
+    - lib/historical_events.json
+    - assets/data/history_events.sqlite
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
