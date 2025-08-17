@@ -138,3 +138,5 @@ python_proj/image_files/
 /python_proj/input
 /python_proj/output
 flutter_proj/ios/Runner/GoogleService-Info.plist
+/cloudrun_proj/.idea
+/python_gen_script/.idea
