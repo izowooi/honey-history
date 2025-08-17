@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter_proj/core/platform.dart';
 
 // Remote Config 인스턴스 provider
 final remoteConfigProvider = Provider<FirebaseRemoteConfig>((ref) {
@@ -7,7 +8,9 @@ final remoteConfigProvider = Provider<FirebaseRemoteConfig>((ref) {
   
   // 기본값 설정
   remoteConfig.setDefaults({
-    'review_version': '0', // Android versionCode (정수) 기본값
+    'review_versioncode_aos': '0',
+    'review_versioncode_ios': '0',
+    'review_version': '0',
   });
   
   print('Remote Config Provider 초기화됨');
@@ -40,16 +43,18 @@ final remoteConfigValuesProvider = FutureProvider<Map<String, String>>((ref) asy
     final allKeys = remoteConfig.getAll();
     print('Remote Config 모든 키: ${allKeys.keys.toList()}');
     
-    // review_version 값 확인
-    final reviewVersion = remoteConfig.getString('review_version');
-    print('review_version 값: "$reviewVersion"');
+    // 플랫폼별 리뷰 버전 확인
+    final aos = remoteConfig.getString('review_versioncode_aos');
+    final ios = remoteConfig.getString('review_versioncode_ios');
+    print('review_versioncode_aos: "$aos" / review_versioncode_ios: "$ios"');
     
     // 모든 설정값 반환
     final result = {
-      'review_version': reviewVersion,
+      'review_versioncode_aos': aos,
+      'review_versioncode_ios': ios,
       'fetch_time': DateTime.now().toIso8601String(),
       'activated': activated.toString(),
-      'last_fetch_time': remoteConfig.lastFetchTime?.toIso8601String() ?? '없음',
+      'last_fetch_time': remoteConfig.lastFetchTime.toIso8601String(),
       'last_fetch_status': remoteConfig.lastFetchStatus.toString(),
     };
     
@@ -61,7 +66,8 @@ final remoteConfigValuesProvider = FutureProvider<Map<String, String>>((ref) asy
     print('스택 트레이스: $stackTrace');
     // 에러 시 기본값 반환
     return {
-      'review_version': '0',
+      'review_versioncode_aos': '0',
+      'review_versioncode_ios': '0',
       'fetch_time': DateTime.now().toIso8601String(),
       'error': e.toString(),
       'stack_trace': stackTrace.toString(),
@@ -72,7 +78,8 @@ final remoteConfigValuesProvider = FutureProvider<Map<String, String>>((ref) asy
 // 특정 키의 값만 가져오는 provider
 final reviewVersionProvider = FutureProvider<String>((ref) async {
   final values = await ref.watch(remoteConfigValuesProvider.future);
-  final version = values['review_version'] ?? '1';
+  final key = reviewVersionKeyForPlatform();
+  final version = values[key] ?? '1';
   print('reviewVersionProvider에서 반환하는 값: "$version"');
   return version;
 });

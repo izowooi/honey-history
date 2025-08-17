@@ -7,6 +7,7 @@ import 'package:flutter_proj/providers/settings_provider.dart';
 import 'package:flutter_proj/db/app_database.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_proj/db/db_initializer.dart';
+import 'package:flutter_proj/core/platform.dart';
 
 // Drift DB 검증 로직
 Future<void> validateDriftDb({int previewLength = 20}) async {
@@ -36,6 +37,7 @@ const bool kRunDriftValidationOnStartup = false;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  initAppPlatform();
   // 사전 생성된 DB를 첫 실행에만 복사
   await copyPrebuiltDbIfNeeded(
     assetDbPath: 'assets/data/history_events.sqlite',
