@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_proj/providers/settings_provider.dart';
 import 'package:flutter_proj/providers/build_info_provider.dart';
 import 'package:flutter_proj/services/push_notification_service.dart';
+import 'package:flutter_proj/widgets/app_links_widget.dart';
 
 class SettingsDrawer extends ConsumerWidget {
   const SettingsDrawer({super.key});
@@ -233,6 +234,32 @@ class SettingsDrawer extends ConsumerWidget {
                       }
                     },
                   );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final isReviewBuild = ref.watch(isReviewBuildProvider);
+              return isReviewBuild.when(
+                data: (flag) {
+                  if (flag) return const SizedBox.shrink();
+                  return const Divider();
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final isReviewBuild = ref.watch(isReviewBuildProvider);
+              return isReviewBuild.when(
+                data: (flag) {
+                  if (flag) return const SizedBox.shrink();
+                  return const AppLinksWidget();
                 },
                 loading: () => const SizedBox.shrink(),
                 error: (_, __) => const SizedBox.shrink(),
