@@ -18,6 +18,22 @@ class DailyCalendarWidget extends ConsumerStatefulWidget {
 }
 
 class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
+  Future<void> _pickDate(BuildContext context, DateTime current, WidgetRef ref) async {
+    final DateTime first = DateTime(1900, 1, 1);
+    final DateTime last = DateTime(2100, 12, 31);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: current,
+      firstDate: first,
+      lastDate: last,
+      helpText: '날짜 선택',
+      cancelText: '취소',
+      confirmText: '확인',
+    );
+    if (picked != null && mounted) {
+      ref.read(selectedDateProvider.notifier).state = picked;
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -228,18 +244,22 @@ class _DailyCalendarWidgetState extends ConsumerState<DailyCalendarWidget> {
           Positioned(
             top: 10,
             left: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.indigo,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                DateFormat('MM월 dd일 EEEE', 'ko_KR').format(selectedDate),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16 * fontSizeScale,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => _pickDate(context, selectedDate, ref),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.indigo,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  DateFormat('MM월 dd일 EEEE', 'ko_KR').format(selectedDate),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16 * fontSizeScale,
+                  ),
                 ),
               ),
             ),
