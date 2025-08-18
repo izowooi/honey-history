@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_proj/providers/settings_provider.dart';
 import 'package:flutter_proj/providers/build_info_provider.dart';
+import 'package:flutter_proj/services/push_notification_service.dart';
 
 class SettingsDrawer extends ConsumerWidget {
   const SettingsDrawer({super.key});
-  static const isNotificationEnabled = false;
   static const isDeveloperMode = false;
 
   @override
@@ -37,14 +37,28 @@ class SettingsDrawer extends ConsumerWidget {
               final isReviewBuild = ref.watch(isReviewBuildProvider);
               return isReviewBuild.when(
                 data: (flag) {
-                  if (flag || isNotificationEnabled == false) return const SizedBox.shrink();
+                  if (flag) return const SizedBox.shrink();
                   return CheckboxListTile(
                     title: const Text('알림'),
                     subtitle: const Text('매일 역사적 사건 알림 받기'),
                     value: notificationEnabled,
-                    onChanged: (bool? value) {
-                      if (value != null) {
-                        ref.read(notificationEnabledProvider.notifier).setValue(value);
+                    onChanged: (bool? value) async {
+                      if (value == null) return;
+                      if (value) {
+                        final granted = await PushNotificationService.ensurePermission();
+                        if (granted) {
+                          await PushNotificationService.subscribeHistoryTopic();
+                          ref.read(notificationEnabledProvider.notifier).setValue(true);
+                        } else {
+                          ref.read(notificationEnabledProvider.notifier).setValue(false);
+                          final messenger = ScaffoldMessenger.maybeOf(context);
+                          messenger?.showSnackBar(
+                            const SnackBar(content: Text('알림 권한이 필요합니다. 설정에서 허용해주세요.')),
+                          );
+                        }
+                      } else {
+                        await PushNotificationService.unsubscribeHistoryTopic();
+                        ref.read(notificationEnabledProvider.notifier).setValue(false);
                       }
                     },
                   );
@@ -58,7 +72,7 @@ class SettingsDrawer extends ConsumerWidget {
             builder: (context, ref, _) {
               final isReviewBuild = ref.watch(isReviewBuildProvider);
               return isReviewBuild.when(
-                data: (flag) => flag || isNotificationEnabled == false ? const SizedBox.shrink() : const Divider(),
+                data: (flag) => flag ? const SizedBox.shrink() : const Divider(),
                 loading: () => const SizedBox.shrink(),
                 error: (_, __) => const SizedBox.shrink(),
               );

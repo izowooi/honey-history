@@ -8,6 +8,8 @@ import 'package:flutter_proj/db/app_database.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_proj/db/db_initializer.dart';
 import 'package:flutter_proj/core/platform.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_proj/services/push_notification_service.dart';
 
 // Drift DB 검증 로직
 Future<void> validateDriftDb({int previewLength = 20}) async {
@@ -38,6 +40,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   initAppPlatform();
+  // 저장된 설정이 켜져 있으면 권한 확인 후 토픽 재구독 (재설치/토큰 변경 대비)
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final enabled = prefs.getBool('notification_enabled') ?? false;
+    if (enabled) {
+      final granted = await PushNotificationService.ensurePermission();
+      if (granted) {
+        await PushNotificationService.subscribeHistoryTopic();
+      }
+    }
+  } catch (_) {}
   // 사전 생성된 DB를 첫 실행에만 복사
   await copyPrebuiltDbIfNeeded(
     assetDbPath: 'assets/data/history_events.sqlite',
