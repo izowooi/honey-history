@@ -86,6 +86,54 @@ dart run build_runner build --delete-conflicting-outputs
 
 ---
 
+## 🎨 앱 아이콘 변경
+앱 아이콘을 변경하려면 `flutter_launcher_icons` 패키지를 사용합니다.
+
+### 1) 의존성 추가
+```yaml
+dev_dependencies:
+  flutter_launcher_icons: ^0.14.4
+```
+
+### 2) 설정 추가
+`pubspec.yaml`에 아이콘 설정을 추가합니다:
+```yaml
+flutter_launcher_icons:
+  android: "launcher_icon"  # 안드로이드: android/app/src/main/res/
+  ios: true                 # iOS: ios/Runner/Assets.xcassets/AppIcon.appiconset/
+  image_path: "assets/icon/app_icon.png"  # 1024x1024 PNG
+  min_sdk_android: 21      # Android minSdkVersion
+  remove_alpha_ios: true   # iOS에서 알파 채널 제거
+  web:
+    generate: false
+  windows:
+    generate: false
+  macos:
+    generate: false
+```
+
+### 3) 아이콘 생성
+```bash
+# 의존성 설치
+flutter pub get
+
+# 아이콘 생성
+dart run flutter_launcher_icons
+```
+
+### 4) 주의사항
+- 소스 이미지(`image_path`)는 1024x1024 PNG 권장
+- iOS는 알파 채널 없는 이미지 필요 ( 현재 : assets/icon/icon.png )
+- Android adaptive icon 사용 시 추가 설정 필요:
+```yaml
+flutter_launcher_icons:
+  android: true
+  adaptive_icon_background: "#FFFFFF"  # 배경색
+  adaptive_icon_foreground: "assets/icon/android_foreground.png"  # 전경 이미지
+```
+
+---
+
 ## 🚑 Troubleshooting
 - "파일을 찾을 수 없습니다" (gen 스크립트): `lib/gen_realm.dart`의 JSON 경로를 실제 파일로 바꿨는지 확인.
 - "스키마 불일치/필드 누락": 모델 수정 후 `flutter pub run realm generate` 재실행 + 새 Realm DB 생성 후 `assets/history_events.realm` 교체.
