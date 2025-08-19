@@ -33,52 +33,31 @@ class SettingsDrawer extends ConsumerWidget {
               ),
             ),
           ),
-          Consumer(
-            builder: (context, ref, _) {
-              final isReviewBuild = ref.watch(isReviewBuildProvider);
-              return isReviewBuild.when(
-                data: (flag) {
-                  if (flag) return const SizedBox.shrink();
-                  return CheckboxListTile(
-                    title: const Text('알림'),
-                    subtitle: const Text('매일 역사적 사건 알림 받기'),
-                    value: notificationEnabled,
-                    onChanged: (bool? value) async {
-                      if (value == null) return;
-                      if (value) {
-                        final granted = await PushNotificationService.ensurePermission();
-                        if (granted) {
-                          await PushNotificationService.subscribeHistoryTopic();
-                          ref.read(notificationEnabledProvider.notifier).setValue(true);
-                        } else {
-                          ref.read(notificationEnabledProvider.notifier).setValue(false);
-                          final messenger = ScaffoldMessenger.maybeOf(context);
-                          messenger?.showSnackBar(
-                            const SnackBar(content: Text('알림 권한이 필요합니다. 설정에서 허용해주세요.')),
-                          );
-                        }
-                      } else {
-                        await PushNotificationService.unsubscribeHistoryTopic();
-                        ref.read(notificationEnabledProvider.notifier).setValue(false);
-                      }
-                    },
+          CheckboxListTile(
+            title: const Text('알림'),
+            subtitle: const Text('매일 역사적 사건 알림 받기'),
+            value: notificationEnabled,
+            onChanged: (bool? value) async {
+              if (value == null) return;
+              if (value) {
+                final granted = await PushNotificationService.ensurePermission();
+                if (granted) {
+                  await PushNotificationService.subscribeHistoryTopic();
+                  ref.read(notificationEnabledProvider.notifier).setValue(true);
+                } else {
+                  ref.read(notificationEnabledProvider.notifier).setValue(false);
+                  final messenger = ScaffoldMessenger.maybeOf(context);
+                  messenger?.showSnackBar(
+                    const SnackBar(content: Text('알림 권한이 필요합니다. 설정에서 허용해주세요.')),
                   );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              );
+                }
+              } else {
+                await PushNotificationService.unsubscribeHistoryTopic();
+                ref.read(notificationEnabledProvider.notifier).setValue(false);
+              }
             },
           ),
-          Consumer(
-            builder: (context, ref, _) {
-              final isReviewBuild = ref.watch(isReviewBuildProvider);
-              return isReviewBuild.when(
-                data: (flag) => flag ? const SizedBox.shrink() : const Divider(),
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              );
-            },
-          ),
+          const Divider(),
           Consumer(
             builder: (context, ref, _) {
               final isReviewBuild = ref.watch(isReviewBuildProvider);
@@ -234,19 +213,6 @@ class SettingsDrawer extends ConsumerWidget {
                       }
                     },
                   );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              );
-            },
-          ),
-          Consumer(
-            builder: (context, ref, _) {
-              final isReviewBuild = ref.watch(isReviewBuildProvider);
-              return isReviewBuild.when(
-                data: (flag) {
-                  if (flag) return const SizedBox.shrink();
-                  return const Divider();
                 },
                 loading: () => const SizedBox.shrink(),
                 error: (_, __) => const SizedBox.shrink(),

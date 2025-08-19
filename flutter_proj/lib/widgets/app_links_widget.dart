@@ -29,7 +29,7 @@ class AppLinksWidget extends StatelessWidget {
     final links = <(String, String)>[
       const ('🧪 미학 점수', 'https://huggingface.co/spaces/izowooi/aesthetics_score'),
       const ('📊 이미지 갤러리', 'https://gen-image-gallery.streamlit.app/'),
-      ('📱 스토어', _storeUrl()),
+      ('🔮 타로카드', _storeUrl()),
       const ('🚀 원본 코드', 'https://github.com/izowooi/honey-history/tree/main/flutter_proj'),
     ];
 
