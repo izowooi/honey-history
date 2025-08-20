@@ -55,6 +55,32 @@ def get_supabase_client() -> Optional[Client]:
     return supabase_client
 
 
+# 오늘 날짜의 이벤트를 Supabase에서 조회
+def get_today_event_from_supabase(client: Client) -> Optional[Dict[str, str]]:
+    try:
+        today_str = datetime.now().strftime('%m%d')
+        resp = (
+            client
+            .table('daily_events')
+            .select('title, body')
+            .eq('date_key', today_str)
+            .limit(1)
+            .execute()
+        )
+
+        if resp.data:
+            event = resp.data[0]
+            title = event.get('title')
+            body = event.get('body')
+            if title and body:
+                logger.info(f"Supabase 오늘 이벤트 사용(date_key={today_str})")
+                return {"title": title, "body": body}
+        logger.warning(f"오늘(date_key={today_str}) 이벤트가 없거나 필드 누락. payload/기본값 사용")
+        return None
+    except Exception as e:
+        logger.error(f"Supabase 오늘 이벤트 조회 실패: {str(e)}")
+        return None
+
 # Firebase Admin 초기화
 def initialize_firebase_app() -> bool:
     """Firebase Admin SDK 초기화. 이미 초기화되어 있으면 True 반환"""
@@ -130,11 +156,14 @@ async def handle_pubsub_and_notify_fcm(request: Request):
             payload = {}
 
 
-        # FCM 메시지 구성 및 전송 (요청 바디에 title/body가 있으면 우선 사용)
+        # Supabase에서 오늘의 이벤트 조회 시도 (성공 시 payload 대신 사용)
         topic_name = "history_9_kr"
-        notif_title = (payload.get("title") if isinstance(payload, dict) else None) or "Notification from Cloud Run"
-        notif_body = (payload.get("body") if isinstance(payload,
-                                                        dict) else None) or "A new event has been received and processed."
+        supabase = get_supabase_client()
+        event_texts = get_today_event_from_supabase(supabase) if supabase else None
+
+        # 우선순위: Supabase 결과 > 요청 바디 값 > 기본값
+        notif_title = event_texts.get("title") if event_texts else "오늘의 역사"
+        notif_body = event_texts.get("body") if event_texts else "오늘은 무슨 일이 있었을까요?"
 
         # 이미지 URL은 요청값 우선, 없으면 기본값 사용
         image_url = (payload.get("image_url") if isinstance(payload, dict) else None) or None
@@ -181,82 +210,16 @@ async def handle_pubsub_and_notify_fcm(request: Request):
         raise HTTPException(status_code=500, detail="Failed to send FCM")
 
 
-
-async def get_random_images_from_db(client: Client, count: int) -> List[Dict]:
-    """Supabase DB에서 랜덤 이미지 가져오기"""
-    try:
-        # 전체 이미지 개수 확인
-        count_response = client.table('images').select("*", count='exact').execute()
-        total_count = count_response.count if hasattr(count_response, 'count') else 0
-
-        if total_count == 0:
-            logger.warning("DB에 이미지가 없습니다.")
-            return []
-
-        logger.info(f"총 {total_count}개의 이미지가 DB에 있습니다.")
-
-        # 요청 개수 조정
-        actual_count = min(count, total_count)
-
-        # 랜덤 오프셋 사용 (큰 DB)
-        selected_images = []
-        used_offsets = set()
-
-        for _ in range(actual_count):
-            attempts = 0
-            while attempts < 10:
-                offset = random.randint(0, total_count - 1)
-                if offset not in used_offsets:
-                    used_offsets.add(offset)
-                    response = client.table('images') \
-                        .select("id, url, title, tags, tag_prefix, metadata, created_at") \
-                        .limit(1) \
-                        .offset(offset) \
-                        .execute()
-
-                    if response.data:
-                        selected_images.extend(response.data)
-                        break
-                attempts += 1
-
-        # 응답 형식 맞추기
-        formatted_images = []
-        for img in selected_images:
-            formatted_images.append({
-                "id": img.get('id', f"img_{random.randint(10000, 99999)}"),
-                "url": img.get('url', R2_IMAGE_URL),
-                "title": img.get('title', 'Untitled Image'),
-                "description": f"Image from database with tags: {', '.join(img.get('tags', [])[:3])}",
-                "metadata": img.get('metadata', {
-                    "width": 300,
-                    "height": 300,
-                    "format": "jpg"
-                }),
-                "tags": img.get('tags', []),
-                "tag_prefix": img.get('tag_prefix', 'IMG'),
-                "created_at": img.get('created_at', datetime.utcnow().isoformat())
-            })
-
-        logger.info(f"DB에서 {len(formatted_images)}개 이미지 조회 성공")
-        return formatted_images
-
-    except Exception as e:
-        logger.error(f"DB 조회 중 오류: {str(e)}")
-        raise
-
-
 @app.get("/")
 async def root():
     """API 정보를 반환하는 루트 엔드포인트"""
     supabase_enabled = get_supabase_client() is not None
 
     return {
-        "message": "Image Gallery API on Google Cloud Run",
-        "version": "2.0.0",
+        "message": "오늘의 역사 API on Google Cloud Run",
+        "version": "1.0.0",
         "endpoints": {
             "ping": "/ping - 헬스체크",
-            "random_images": "/random-images?count=10&use_db=true - 랜덤 이미지 반환",
-            "image_stats": "/images/stats - DB 이미지 통계",
             "docs": "/docs - API 문서 (Swagger UI)",
             "redoc": "/redoc - API 문서 (ReDoc)"
         },
