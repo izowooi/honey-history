@@ -27,7 +27,7 @@ def fetch_today_event():
 
         # 3. 데이터베이스에서 데이터 조회
         # 'daily_events' 테이블에서 'date_key'가 오늘 날짜와 일치하는 행을 찾습니다.
-        response = supabase.from_('daily_events').select('title, body').execute()
+        response = supabase.from_('daily_events').select('title, body').eq("date_key", today_str).execute()
 
         # 4. 결과 처리
         # response.data는 리스트 형태로 결과를 반환합니다. (예: [{'title': '...', 'body': '...'}])
