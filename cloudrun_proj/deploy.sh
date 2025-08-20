@@ -2,7 +2,7 @@
 
 # 설정 변수
 PROJECT_ID="honey-history"  # GCP 프로젝트 ID로 변경하세요
-SERVICE_NAME="image-gallery-api"
+SERVICE_NAME="honey-history-api"
 REGION="asia-northeast3"  # 서울 리전
 
 echo "🚀 Google Cloud Run 배포 시작..."

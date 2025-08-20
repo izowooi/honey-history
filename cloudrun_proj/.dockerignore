@@ -1,0 +1,39 @@
+# Exclude local virtual environments
+venv/
+.venv/
+env/
+
+# Python cache/artifacts
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+.coverage*
+htmlcov/
+.cache/
+
+# VCS/IDE
+.git/
+.gitignore
+.idea/
+.vscode/
+.DS_Store
+
+# Node/npm (if present)
+node_modules/
+
+# Environment and logs
+.env
+.env.*
+*.log
+
+# Build outputs
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
