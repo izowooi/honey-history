@@ -2,7 +2,7 @@ from fastapi import FastAPI, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Optional
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from supabase import create_client, Client
 import logging
@@ -32,6 +32,34 @@ app.add_middleware(
 supabase_client: Optional[Client] = None
 
 
+def _parse_topic_utc_offset_hours(topic_name: Optional[str]) -> Optional[int]:
+    """토픽명에서 UTC 오프셋(시간)을 추출. 예: "history_9_kr" -> 9
+
+    우선순위:
+    1) 정규식으로 중간의 정수 시간차 추출 (예: _9_ / _-5_ 등)
+    2) 지역 코드가 'kr'인 경우 9
+    추출 실패 시 None 반환
+    """
+    if not topic_name:
+        return None
+
+    try:
+        import re
+
+        # 패턴 예시: "history_9_kr", "foo_-3_bar" 등에서 숫자 캡처
+        match = re.search(r"_(?P<hours>-?\d+)_", topic_name)
+        if match:
+            return int(match.group("hours"))
+
+        # 지역 코드 기반 기본값 (향후 확장 가능)
+        if topic_name.endswith("_kr") or "_kr" in topic_name:
+            return 9
+    except Exception:
+        pass
+
+    return None
+
+
 def get_supabase_client() -> Optional[Client]:
     """Supabase 클라이언트를 가져오거나 생성"""
     global supabase_client
@@ -56,9 +84,15 @@ def get_supabase_client() -> Optional[Client]:
 
 
 # 오늘 날짜의 이벤트를 Supabase에서 조회
-def get_today_event_from_supabase(client: Client) -> Optional[Dict[str, str]]:
+def get_today_event_from_supabase(client: Client, topic_name: Optional[str] = None) -> Optional[Dict[str, str]]:
     try:
-        today_str = datetime.now().strftime('%m%d')
+        # 토픽에서 시간대 오프셋(시간) 추출. 실패 시 KR(+9) 기본값 사용
+        offset_hours = _parse_topic_utc_offset_hours(topic_name)
+        if offset_hours is None:
+            offset_hours = 9
+
+        today_dt = datetime.utcnow() + timedelta(hours=offset_hours)
+        today_str = today_dt.strftime('%m%d')
         resp = (
             client
             .table('daily_events')
@@ -73,9 +107,9 @@ def get_today_event_from_supabase(client: Client) -> Optional[Dict[str, str]]:
             title = event.get('title')
             body = event.get('body')
             if title and body:
-                logger.info(f"Supabase 오늘 이벤트 사용(date_key={today_str})")
+                logger.info(f"Supabase 오늘 이벤트 사용(date_key={today_str}, offset={offset_hours}h, topic={topic_name})")
                 return {"title": title, "body": body}
-        logger.warning(f"오늘(date_key={today_str}) 이벤트가 없거나 필드 누락. payload/기본값 사용")
+        logger.warning(f"오늘(date_key={today_str}) 이벤트가 없거나 필드 누락. payload/기본값 사용 (offset={offset_hours}h, topic={topic_name})")
         return None
     except Exception as e:
         logger.error(f"Supabase 오늘 이벤트 조회 실패: {str(e)}")
@@ -159,7 +193,7 @@ async def handle_pubsub_and_notify_fcm(request: Request):
         # Supabase에서 오늘의 이벤트 조회 시도 (성공 시 payload 대신 사용)
         topic_name = "history_9_kr"
         supabase = get_supabase_client()
-        event_texts = get_today_event_from_supabase(supabase) if supabase else None
+        event_texts = get_today_event_from_supabase(supabase, topic_name) if supabase else None
 
         # 우선순위: Supabase 결과 > 요청 바디 값 > 기본값
         notif_title = event_texts.get("title") if event_texts else "오늘의 역사"
