@@ -4,6 +4,7 @@ import 'package:flutter_proj/providers/settings_provider.dart';
 import 'package:flutter_proj/providers/build_info_provider.dart';
 import 'package:flutter_proj/services/push_notification_service.dart';
 import 'package:flutter_proj/widgets/app_links_widget.dart';
+import 'package:flutter_proj/providers/bulk_audio_download_provider.dart';
 
 class SettingsDrawer extends ConsumerWidget {
   const SettingsDrawer({super.key});
@@ -216,6 +217,54 @@ class SettingsDrawer extends ConsumerWidget {
                 },
                 loading: () => const SizedBox.shrink(),
                 error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+          ),
+          const Divider(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              children: const [
+                Text(
+                  '오디오 일괄 다운로드',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final state = ref.watch(bulkAudioDownloadProvider);
+              final notifier = ref.read(bulkAudioDownloadProvider.notifier);
+              final total = state.total;
+              final completed = state.completed;
+              final progress = total == 0 ? 0.0 : (completed / total).clamp(0.0, 1.0);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text('${completed}/${total} 완료 (실패 ${state.failed})'),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: LinearProgressIndicator(value: progress),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: state.isDownloading ? null : () => notifier.startDownload(),
+                        icon: const Icon(Icons.download),
+                        label: const Text('다운로드 시작'),
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
           ),
