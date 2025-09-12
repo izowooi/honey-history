@@ -1,4 +1,4 @@
-# 🍯 꿀 역사 - 일일 역사 학습 앱 📚
+# 🍯 오늘의 역사 - 일일 역사 학습 앱 📚
 
 > 매일 새로운 역사적 사건을 발견하고 학습하는 즐거움! AI와 함께하는 역사 여행을 시작해보세요.
 
@@ -17,7 +17,7 @@
 
 ## 🚀 프로젝트 소개
 
-꿀 역사는 매일 다른 역사적 사건을 학습할 수 있는 Flutter 기반 교육용 모바일 앱입니다. 사용자는 날짜별로 흥미진진한 역사적 사건들을 발견하고, 오디오 해설과 관련 영상을 통해 깊이 있는 학습 경험을 할 수 있습니다.
+오늘의 역사는 매일 다른 역사적 사건을 학습할 수 있는 Flutter 기반 교육용 모바일 앱입니다. 사용자는 날짜별로 흥미진진한 역사적 사건들을 발견하고, 오디오 해설과 관련 영상을 통해 깊이 있는 학습 경험을 할 수 있습니다.
 
 ### ✨ 주요 기능
 
@@ -68,7 +68,7 @@
 ```mermaid
 graph TB
     subgraph "📱 Client Layer"
-        Flutter[🍯 Flutter App<br/>꿀 역사]
+        Flutter[🍯 Flutter App<br/>오늘의 역사]
     end
     
     subgraph "🔥 Firebase Services"
@@ -205,7 +205,7 @@ dart run build_runner build --delete-conflicting-outputs
 ```mermaid
 sequenceDiagram
     participant User as 👤 사용자
-    participant App as 📱 꿀 역사 앱
+    participant App as 📱 오늘의 역사 앱
     participant Cache as 📂 로컬 캐시
     participant CDN as ☁️ 오디오 CDN
     participant LM as 🎙️ Notebook LM
@@ -422,7 +422,7 @@ keytool -genkey -v -keystore honey-history.jks -keyalg RSA -keysize 2048 -validi
 
 ```mermaid
 mindmap
-  root((🍯 꿀 역사))
+  root((🍯 오늘의 역사))
     🎯 핵심 기능
       📚 더 많은 역사적 사건
       🎨 인터랙티브 타임라인
@@ -486,7 +486,7 @@ pie title 📱 앱 성능 최적화 영역
 
 <div align="center">
 
-**🍯 매일 새로운 역사의 발견, 꿀 역사와 함께하세요! 📚✨**
+**🍯 매일 새로운 역사의 발견, 오늘의 역사와 함께하세요! 📚✨**
 
 [![Get it on Google Play](https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.izowooi.honey_history)
 [![Download on the App Store](https://img.shields.io/badge/App_Store-0D96F6?style=for-the-badge&logo=app-store&logoColor=white)](https://apps.apple.com/kr/app/역사-이야기/id6751049464)
