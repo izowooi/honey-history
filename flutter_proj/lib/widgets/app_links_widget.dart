@@ -1,19 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_proj/core/platform.dart';
 import 'package:flutter_proj/model/app_links_model.dart';
+import 'package:flutter_proj/providers/remote_config_provider.dart';
 
-class AppLinksWidget extends StatefulWidget {
+class AppLinksWidget extends ConsumerStatefulWidget {
   const AppLinksWidget({super.key});
 
   @override
-  State<AppLinksWidget> createState() => _AppLinksWidgetState();
+  ConsumerState<AppLinksWidget> createState() => _AppLinksWidgetState();
 }
 
-class _AppLinksWidgetState extends State<AppLinksWidget> {
+class _AppLinksWidgetState extends ConsumerState<AppLinksWidget> {
   AppLinksConfig? _config;
   String? _packageName;
   bool _isLoading = true;
@@ -27,7 +28,12 @@ class _AppLinksWidgetState extends State<AppLinksWidget> {
   Future<void> _loadConfig() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
-      final jsonString = await rootBundle.loadString('assets/data/app_links_config.json');
+
+      // Firebase Remote Config에서 설정 가져오기
+      final remoteConfig = ref.read(remoteConfigProvider);
+      await remoteConfig.fetchAndActivate();
+
+      final jsonString = remoteConfig.getString('app_links_config');
       final jsonMap = json.decode(jsonString) as Map<String, dynamic>;
 
       setState(() {

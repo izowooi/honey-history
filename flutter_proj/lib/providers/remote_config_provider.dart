@@ -11,6 +11,7 @@ final remoteConfigProvider = Provider<FirebaseRemoteConfig>((ref) {
     'review_versioncode_aos': '0',
     'review_versioncode_ios': '0',
     'review_version': '0',
+    'app_links_config': '{"app_links":[{"type":"web","title":"🧪 미학 점수","url":"https://huggingface.co/spaces/izowooi/aesthetics_score"},{"type":"web","title":"📊 이미지 갤러리","url":"https://gen-image-gallery.streamlit.app/"},{"type":"app","title":"🔮 타로카드","platforms":{"android":"https://play.google.com/store/apps/details?id=com.izowooi.mystic_cocoa","ios":"https://play.google.com/store/apps/details?id=com.izowooi.mystic_cocoa","default":"https://play.google.com/store/apps/details?id=com.izowooi.mystic_cocoa"}},{"type":"sourceCode","title":"","packages":{"com.izowooi.honey_history":{"title":"🚀 원본 코드","url":"https://github.com/izowooi/honey-history/tree/main/flutter_proj"},"com.izowooi.honeyhistory":{"title":"🚀 원본 코드","url":"https://github.com/izowooi/honey-history/tree/main/flutter_proj"}}}]}',
   });
   
   print('Remote Config Provider 초기화됨');
