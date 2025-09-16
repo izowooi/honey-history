@@ -81,6 +81,7 @@ flutter:
   assets:
     - assets/data/
     - assets/data/movies.json
+    - assets/data/app_links_config.json
     - assets/illustration/
     - lib/historical_events.json
     - assets/data/history_events.sqlite
