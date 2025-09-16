@@ -281,6 +281,7 @@ class SettingsDrawer extends ConsumerWidget {
               );
             },
           ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
         ],
       ),
     );
